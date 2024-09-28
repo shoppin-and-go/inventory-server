@@ -136,17 +136,14 @@ class DeviceConnectionControllerIntegrationTest(
         val deviceId = DeviceId("device-abc")
         val otherDeviceId = DeviceId("device-xyz")
 
-        lateinit var firstConnection: CartConnection
-        lateinit var secondConnection: CartConnection
-
         beforeTest {
             val cartOne = cartRepository.save(Cart(CartCode("cart-001")))
             val cartTwo = cartRepository.save(Cart(CartCode("cart-002")))
 
-            firstConnection = cartConnectionRepository.save(CartConnection(cartOne, deviceId))
+            cartConnectionRepository.save(CartConnection(cartOne, deviceId))
             cartConnectionRepository.save(CartConnection(cartOne, otherDeviceId))
 
-            secondConnection = cartConnectionRepository.save(CartConnection(cartTwo, deviceId))
+            cartConnectionRepository.save(CartConnection(cartTwo, deviceId))
             cartConnectionRepository.save(CartConnection(cartTwo, otherDeviceId))
         }
 
