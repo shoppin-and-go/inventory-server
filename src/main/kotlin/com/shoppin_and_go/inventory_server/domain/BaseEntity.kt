@@ -23,6 +23,7 @@ abstract class BaseEntity {
 
     @LastModifiedDate
     @Column(nullable = false)
+    @Suppress("unused")
     var updatedAt: LocalDateTime = LocalDateTime.now()
         protected set
 }
