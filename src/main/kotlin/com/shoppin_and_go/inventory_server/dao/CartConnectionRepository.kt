@@ -8,6 +8,7 @@ import java.util.*
 interface CartConnectionRepository : Repository<CartConnection, UUID> {
     fun findByDeviceIdAndDisconnectedAtIsNull(deviceId: DeviceId): List<CartConnection>
     fun findByDeviceIdOrderByCreatedAtDesc(deviceId: DeviceId): List<CartConnection>
+    fun findByCartIdAndDisconnectedAtIsNull(cartId: UUID): List<CartConnection>
     fun existsByDeviceIdAndDisconnectedAtIsNull(deviceId: DeviceId): Boolean
     fun save(cartConnection: CartConnection): CartConnection
     fun saveAll(cartConnections: Iterable<CartConnection>): List<CartConnection>
