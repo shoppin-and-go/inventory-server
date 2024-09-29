@@ -1,0 +1,69 @@
+<!-- src/main/resources/static/chat.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Boot WebSocket Chat</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #chat { width: calc(100% - 64px); margin: 0 32px; }
+    </style>
+</head>
+<body>
+<div id="chat">
+    <h2>Event subscribe test</h2>
+    <table id="events">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Timestamp</th>
+                <th>Payload</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    let stompClient = null;
+
+    function connect(deviceId) {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe(`/queue/device/${deviceId}`, function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+        });
+    }
+
+    function showMessage(message) {
+        const tableBody = document.querySelector("table#events > tbody");
+
+        const { name, timestamp, payload } = message;
+
+        const eventInfoRow = document.createElement('tr');
+
+        const nameCell = document.createElement('td');
+        const timestampCell = document.createElement('td');
+        const payloadCell = document.createElement('td');
+
+        nameCell.innerText = name;
+        timestampCell.innerText = timestamp;
+        payloadCell.innerText = JSON.stringify(payload);
+
+        eventInfoRow.appendChild(nameCell);
+        eventInfoRow.appendChild(timestampCell);
+        eventInfoRow.appendChild(payloadCell);
+
+        tableBody.appendChild(eventInfoRow);
+        tableBody.scrollTop = tableBody.scrollHeight;
+    }
+
+    connect('device-test_1');
+</script>
+</body>
+</html>
