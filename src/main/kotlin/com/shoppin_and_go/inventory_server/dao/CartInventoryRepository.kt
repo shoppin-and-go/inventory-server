@@ -9,5 +9,6 @@ import java.util.UUID
 
 interface CartInventoryRepository : Repository<CartInventory, UUID> {
     fun findByCartAndProduct(cart: Cart, product: Product): CartInventory?
+    fun findByCart(cart: Cart): List<CartInventory>
     fun save(cartInventory: CartInventory): CartInventory
 }
