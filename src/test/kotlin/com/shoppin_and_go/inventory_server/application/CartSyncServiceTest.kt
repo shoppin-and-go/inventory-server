@@ -30,47 +30,39 @@ class CartSyncServiceTest(
 
         val cartCode = CartCode("ABC123")
         val deviceId = DeviceId("device-xyz")
+        val cart = Cart(cartCode)
 
-        context("연결이 존재하지 않을 때") {
-            beforeTest {
-                every { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns false
+        beforeEach {
+            every { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns false
+            every { cartRepository.findByCode(cartCode) } returns cart
+        }
+
+        it("카트에 성공적으로 연결해야 한다") {
+            val savedConnection = CartConnection(cart, deviceId)
+            every { cartConnectionRepository.save(any()) } returns savedConnection
+
+            val result = cartSyncService.connectToCart(cartCode, deviceId)
+
+            result shouldBe CartConnectionStatus(savedConnection.cart.code, savedConnection.createdAt, savedConnection.connected)
+
+            verify(exactly = 1) { cartRepository.findByCode(cartCode) }
+            verify(exactly = 1) { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) }
+            verify(exactly = 1) { cartConnectionRepository.save(any()) }
+        }
+
+        context("카트를 찾을 수 없을 때") {
+            beforeEach {
+                every { cartRepository.findByCode(cartCode) } returns null
             }
 
-            context("카트를 찾을 수 없을 때") {
-                beforeTest {
-                    every { cartRepository.findByCode(cartCode) } returns null
+            it("CartNotFoundException을 던져야 한다") {
+                shouldThrow<CartNotFoundException> {
+                    cartSyncService.connectToCart(cartCode, deviceId)
                 }
 
-                it("CartNotFoundException을 던져야 한다") {
-                    shouldThrow<CartNotFoundException> {
-                        cartSyncService.connectToCart(cartCode, deviceId)
-                    }
-
-                    verify(exactly = 1) { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) }
-                    verify(exactly = 1) { cartRepository.findByCode(cartCode) }
-                    verify(exactly = 0) { cartConnectionRepository.save(any()) }
-                }
-            }
-
-            context("카트를 찾을 수 있을 때") {
-                val cart = Cart(cartCode)
-
-                beforeTest {
-                    every { cartRepository.findByCode(cartCode) } returns cart
-                }
-
-                it("카트에 성공적으로 연결해야 한다") {
-                    val savedConnection = CartConnection(cart, deviceId)
-                    every { cartConnectionRepository.save(any()) } returns savedConnection
-
-                    val result = cartSyncService.connectToCart(cartCode, deviceId)
-
-                    result shouldBe CartConnectionStatus(savedConnection.cart.code, savedConnection.createdAt, savedConnection.connected)
-
-                    verify(exactly = 1) { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) }
-                    verify(exactly = 1) { cartRepository.findByCode(cartCode) }
-                    verify(exactly = 1) { cartConnectionRepository.save(any()) }
-                }
+                verify(exactly = 1) { cartRepository.findByCode(cartCode) }
+                verify(exactly = 0) { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) }
+                verify(exactly = 0) { cartConnectionRepository.save(any()) }
             }
         }
 
@@ -84,8 +76,6 @@ class CartSyncServiceTest(
                     cartSyncService.connectToCart(cartCode, deviceId)
                 }
 
-                verify(exactly = 1) { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) }
-                verify(exactly = 0) { cartRepository.findByCode(any()) }
                 verify(exactly = 0) { cartConnectionRepository.save(any()) }
             }
         }
@@ -93,9 +83,14 @@ class CartSyncServiceTest(
 
     describe("CartSyncService#disconnectAll") {
         val deviceId = DeviceId("device-xyz")
+        lateinit var connection1: CartConnection
+        lateinit var connection2: CartConnection
 
-        beforeTest {
-            every { cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns emptyList()
+        beforeEach {
+            connection1 = mockk<CartConnection>(relaxed = true)
+            connection2 = mockk<CartConnection>(relaxed = true)
+            every { cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns listOf(connection1, connection2)
+            every { cartConnectionRepository.saveAll(any()) } returns listOf(connection1, connection2)
         }
 
         it("연결이 존재하는지 확인한다") {
@@ -104,27 +99,17 @@ class CartSyncServiceTest(
             verify(exactly = 1) { cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId) }
         }
 
-        context("연결이 존재할 때") {
-            val connection1 = mockk<CartConnection>(relaxed = true)
-            val connection2 = mockk<CartConnection>(relaxed = true)
+        it("모든 연결을 해제해야 한다") {
+            val result = cartSyncService.disconnectAll(deviceId)
 
-            beforeTest {
-                every { cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns listOf(connection1, connection2)
-                every { cartConnectionRepository.saveAll(any()) } returns listOf(connection1, connection2)
-            }
+            verify(exactly = 1) { connection1.disconnect() }
+            verify(exactly = 1) { connection2.disconnect() }
+            verify(exactly = 1) { cartConnectionRepository.saveAll(any()) }
 
-            it("모든 연결을 해제해야 한다") {
-                val result = cartSyncService.disconnectAll(deviceId)
-
-                verify(exactly = 1) { connection1.disconnect() }
-                verify(exactly = 1) { connection2.disconnect() }
-                verify(exactly = 1) { cartConnectionRepository.saveAll(any()) }
-
-                result shouldBe listOf(
-                    CartConnectionStatus(connection1.cart.code, connection1.createdAt, connection1.connected),
-                    CartConnectionStatus(connection2.cart.code, connection2.createdAt, connection2.connected)
-                )
-            }
+            result shouldBe listOf(
+                CartConnectionStatus(connection1.cart.code, connection1.createdAt, connection1.connected),
+                CartConnectionStatus(connection2.cart.code, connection2.createdAt, connection2.connected)
+            )
         }
 
         context("연결이 존재하지 않을 때") {
@@ -148,7 +133,7 @@ class CartSyncServiceTest(
         val connection1 = mockk<CartConnection>(relaxed = true)
         val connection2 = mockk<CartConnection>(relaxed = true)
 
-        beforeTest {
+        beforeEach {
             every { cartConnectionRepository.findByDeviceIdOrderByCreatedAtDesc(deviceId) } returns listOf(connection1, connection2)
         }
 
@@ -168,7 +153,7 @@ class CartSyncServiceTest(
         }
 
         context("연결이 존재하지 않을 때") {
-            beforeTest {
+            beforeEach {
                 every { cartConnectionRepository.findByDeviceIdOrderByCreatedAtDesc(deviceId) } returns emptyList()
             }
 
