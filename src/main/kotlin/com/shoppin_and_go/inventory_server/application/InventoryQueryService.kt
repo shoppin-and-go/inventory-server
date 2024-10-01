@@ -26,8 +26,8 @@ class InventoryQueryService(
             inventories.map {
                 CartInventoryStatus.CartItem(
                     it.product.name,
-                    it.product.price,
                     it.quantity,
+                    it.product.price,
                 )
             }
         )

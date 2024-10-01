@@ -12,6 +12,7 @@ interface CartConnectionRepository : Repository<CartConnection, UUID> {
     fun findByCartIdAndDisconnectedAtIsNull(cartId: UUID): List<CartConnection>
     fun existsByDeviceIdAndDisconnectedAtIsNull(deviceId: DeviceId): Boolean
     fun existsByDeviceIdAndCartAndDisconnectedAtIsNull(deviceId: DeviceId, cart: Cart): Boolean
+    fun delete(cartConnection: CartConnection)
     fun save(cartConnection: CartConnection): CartConnection
     fun saveAll(cartConnections: Iterable<CartConnection>): List<CartConnection>
 }
