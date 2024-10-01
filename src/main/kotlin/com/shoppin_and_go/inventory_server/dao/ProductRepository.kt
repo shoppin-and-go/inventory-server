@@ -7,4 +7,5 @@ import java.util.UUID
 
 interface ProductRepository : Repository<Product, UUID> {
     fun findByCode(code: ProductCode): Product?
+    fun save(product: Product): Product
 }

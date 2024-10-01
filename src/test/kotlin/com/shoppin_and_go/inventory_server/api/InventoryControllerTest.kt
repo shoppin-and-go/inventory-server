@@ -1,9 +1,15 @@
 package com.shoppin_and_go.inventory_server.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.navercorp.fixturemonkey.FixtureMonkey
+import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
+import com.navercorp.fixturemonkey.kotlin.giveMeBuilder
+import com.navercorp.fixturemonkey.kotlin.setExp
 import com.shoppin_and_go.inventory_server.dao.CartRepository
+import com.shoppin_and_go.inventory_server.dao.ProductRepository
 import com.shoppin_and_go.inventory_server.domain.Cart
 import com.shoppin_and_go.inventory_server.domain.CartCode
+import com.shoppin_and_go.inventory_server.domain.Product
 import com.shoppin_and_go.inventory_server.domain.ProductCode
 import com.shoppin_and_go.inventory_server.dto.InventoryUpdateRequest
 import com.shoppin_and_go.inventory_server.event.InventoryChangeEvent
@@ -30,6 +36,7 @@ class InventoryControllerTest(
     @Autowired val mockMvc: MockMvc,
     @Autowired val objectMapper: ObjectMapper,
     @Autowired private val cartRepository: CartRepository,
+    @Autowired private val productRepository: ProductRepository,
 ) : DescribeSpec() {
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") // Intellij false positive bug
     @Autowired
@@ -37,17 +44,30 @@ class InventoryControllerTest(
 
     override fun extensions() = listOf(SpringExtension)
 
+    val fixtureMonkey: FixtureMonkey = FixtureMonkey.builder().plugin(KotlinPlugin()).build()
+
     init {
         this.describe("PATCH /carts/{cartCode}/inventories") {
             lateinit var cart: Cart
             val cartCode = CartCode("cart-test_${UUID.randomUUID()}")
+            val productCode = ProductCode("product-test_${UUID.randomUUID()}")
 
             beforeEach {
-                cart = cartRepository.save(Cart(cartCode))
+                cart = fixtureMonkey
+                    .giveMeBuilder<Cart>()
+                    .setExp(Cart::code, cartCode)
+                    .sample()
+                    .let(cartRepository::save)
+
+                fixtureMonkey
+                    .giveMeBuilder<Product>()
+                    .setExp(Product::code, productCode)
+                    .sample()
+                    .let(productRepository::save)
             }
 
             it("200을 반환한다") {
-                val request = InventoryUpdateRequest(ProductCode("product-test_1"), 1)
+                val request = InventoryUpdateRequest(productCode, 1)
 
                 mockMvc.perform(
                     MockMvcRequestBuilders.patch("/carts/${cartCode}/inventories")
@@ -57,7 +77,7 @@ class InventoryControllerTest(
             }
 
             it("인벤토리 변경 이벤트를 발행한다") {
-                val request = InventoryUpdateRequest(ProductCode("product-test_1"), 1)
+                val request = InventoryUpdateRequest(productCode, 1)
 
                 mockMvc.perform(
                     MockMvcRequestBuilders.patch("/carts/${cartCode}/inventories")
@@ -75,7 +95,7 @@ class InventoryControllerTest(
                 beforeTest { cartRepository.deleteAllByCode(cartCode) }
 
                 it("400을 응답한다") {
-                    val request = InventoryUpdateRequest(ProductCode("product-test_1"), 1)
+                    val request = InventoryUpdateRequest(productCode, 1)
 
                     mockMvc.perform(
                         MockMvcRequestBuilders.patch("/carts/${cartCode}/inventories")
