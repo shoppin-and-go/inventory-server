@@ -8,12 +8,22 @@
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; }
+        table { width: 100% }
+        table, th, td { border: 1px solid black; border-collapse: collapse; }
+        th, td { padding: 8px; }
         #chat { width: calc(100% - 64px); margin: 0 32px; }
     </style>
 </head>
 <body>
 <div id="chat">
     <h2>Event subscribe test</h2>
+    <form>
+        <label for="deviceId"></label><input type="text" id="deviceId">
+        <button type="button" onclick="connect(document.getElementById('deviceId').value)">Subscribe</button>
+    </form>
+
+    <h3>Events</h3>
+
     <table id="events">
         <thead>
             <tr>
@@ -62,8 +72,6 @@
         tableBody.appendChild(eventInfoRow);
         tableBody.scrollTop = tableBody.scrollHeight;
     }
-
-    connect('device-test_1');
 </script>
 </body>
 </html>
