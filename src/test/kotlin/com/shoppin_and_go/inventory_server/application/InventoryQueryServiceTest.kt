@@ -60,8 +60,8 @@ class InventoryQueryServiceTest(
                 cartInventories.map {
                     CartInventoryStatus.CartItem(
                         it.product.name,
-                        it.product.price,
                         it.quantity,
+                        it.product.price,
                     )
                 }
             )

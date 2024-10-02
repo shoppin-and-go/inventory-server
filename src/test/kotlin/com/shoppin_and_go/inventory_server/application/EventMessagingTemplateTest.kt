@@ -14,7 +14,7 @@ class EventMessagingTemplateTest : DescribeSpec({
     lateinit var simpMessagingTemplate: SimpMessagingTemplate
     lateinit var eventMessagingTemplate: EventMessagingTemplate
 
-    beforeTest {
+    beforeEach {
         simpMessagingTemplate = mockk(relaxed = true)
         eventMessagingTemplate = EventMessagingTemplate(simpMessagingTemplate)
     }

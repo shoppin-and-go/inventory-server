@@ -19,23 +19,21 @@ class CartConnectionTest : DescribeSpec({
     describe("CartConnection#connected") {
         lateinit var connection: CartConnection
 
-        beforeTest {
+        beforeEach {
             val cart = Cart(CartCode("ABC123"))
             val deviceId = DeviceId("device-xyz")
             connection = cart.createConnection(deviceId)
         }
 
+        it("returns true") {
+            connection.connected shouldBe true
+        }
+
         context("when disconnectedAt is not null") {
-            beforeTest { connection.disconnect() }
+            beforeEach { connection.disconnect() }
 
             it("returns false") {
                 connection.connected shouldBe false
-            }
-        }
-
-        context("when disconnectedAt is null") {
-            it("returns true") {
-                connection.connected shouldBe true
             }
         }
     }

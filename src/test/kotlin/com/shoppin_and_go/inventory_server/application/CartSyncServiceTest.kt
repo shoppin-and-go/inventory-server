@@ -67,7 +67,7 @@ class CartSyncServiceTest(
         }
 
         context("연결이 이미 존재할 때") {
-            beforeTest {
+            beforeEach {
                 every { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns true
             }
 
@@ -113,7 +113,7 @@ class CartSyncServiceTest(
         }
 
         context("연결이 존재하지 않을 때") {
-            beforeTest {
+            beforeEach {
                 every { cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns emptyList()
             }
 

@@ -95,7 +95,7 @@ class InventoryControllerTest(
             }
 
             context("코드에 해당하는 카트가 없을 때") {
-                beforeTest { cartRepository.deleteAllByCode(cartCode) }
+                beforeEach { cartRepository.delete(cart) }
 
                 it("400을 응답한다") {
                     val request = InventoryUpdateRequest(productCode, 1)

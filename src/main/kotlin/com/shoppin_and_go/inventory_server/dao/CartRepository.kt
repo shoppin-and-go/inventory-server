@@ -8,5 +8,5 @@ import java.util.UUID
 interface CartRepository : Repository<Cart, UUID> {
     fun findByCode(code: CartCode): Cart?
     fun save(cart: Cart): Cart
-    fun deleteAllByCode(code: CartCode)
+    fun delete(cart: Cart)
 }

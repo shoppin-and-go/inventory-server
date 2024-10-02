@@ -57,8 +57,8 @@ class DeviceConnectionControllerIntegrationTest(
         }
 
         context("코드에 해당하는 카트가 없는 경우") {
-            beforeTest {
-                cartRepository.deleteAllByCode(cartCode)
+            beforeEach {
+                cartRepository.delete(cart)
             }
 
             it("400 오류를 반환한다") {
@@ -76,7 +76,7 @@ class DeviceConnectionControllerIntegrationTest(
         }
 
         context("기기와 이미 연결된 카트가 있는 경우") {
-            beforeTest {
+            beforeEach {
                 val connection = CartConnection(cart, deviceId)
                 cartConnectionRepository.save(connection)
             }
@@ -103,7 +103,7 @@ class DeviceConnectionControllerIntegrationTest(
         lateinit var firstConnection: CartConnection
         lateinit var secondConnection: CartConnection
 
-        beforeTest {
+        beforeEach {
             val cartOne = cartRepository.save(Cart(CartCode("cart-001")))
             val cartTwo = cartRepository.save(Cart(CartCode("cart-002")))
 
@@ -136,7 +136,7 @@ class DeviceConnectionControllerIntegrationTest(
         val deviceId = DeviceId("device-abc")
         val otherDeviceId = DeviceId("device-xyz")
 
-        beforeTest {
+        beforeEach {
             val cartOne = cartRepository.save(Cart(CartCode("cart-001")))
             val cartTwo = cartRepository.save(Cart(CartCode("cart-002")))
 
