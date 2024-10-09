@@ -9,11 +9,13 @@ import com.shoppin_and_go.inventory_server.dto.CartConnectionStatus
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
 import com.shoppin_and_go.inventory_server.exception.DuplicateCartConnectionException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CartSyncService(
     private val cartRepository: CartRepository,
     private val cartConnectionRepository: CartConnectionRepository,
+    private val inventoryCommandService: InventoryCommandService,
 ) {
     fun connectToCart(code: CartCode, deviceId: DeviceId): CartConnectionStatus {
         val cart = cartRepository.findByCode(code) ?: throw CartNotFoundException(code)
@@ -22,27 +24,28 @@ class CartSyncService(
         if (connectionExistence) throw DuplicateCartConnectionException(deviceId)
 
         val cartConnection = cart.createConnection(deviceId)
-        return cartConnectionRepository.save(cartConnection).let(::convertToCartConnectionStatus)
+        return cartConnectionRepository.save(cartConnection).let(CartConnectionStatus::of)
     }
 
+    @Transactional
     fun disconnectFromAllCarts(deviceId: DeviceId): List<CartConnectionStatus> {
         val existConnections = cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId)
-        if (existConnections.isEmpty()) return emptyList()
 
-        existConnections.forEach(CartConnection::disconnect)
-
-        cartConnectionRepository.saveAll(existConnections)
-
-        return existConnections.map(::convertToCartConnectionStatus)
+        return existConnections.map(::disconnectFromCart)
     }
 
     fun listCartConnections(deviceId: DeviceId): List<CartConnectionStatus> {
         val connections = cartConnectionRepository.findByDeviceIdOrderByCreatedAtDesc(deviceId)
 
-        return connections.map(::convertToCartConnectionStatus)
+        return connections.map(CartConnectionStatus::of)
     }
 
-    private fun convertToCartConnectionStatus(cartConnection: CartConnection): CartConnectionStatus {
-        return CartConnectionStatus(cartConnection.cart.code, cartConnection.createdAt, cartConnection.connected)
+    private fun disconnectFromCart(cartConnection: CartConnection): CartConnectionStatus {
+        val cart = cartConnection.cart
+
+        cartConnection.disconnect()
+        inventoryCommandService.flushCartInventory(cart)
+
+        return cartConnectionRepository.save(cartConnection).let(CartConnectionStatus::of)
     }
 }

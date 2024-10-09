@@ -21,10 +21,11 @@ import io.mockk.verify
 class CartSyncServiceTest(
     @MockkBean private val cartRepository: CartRepository,
     @MockkBean private val cartConnectionRepository: CartConnectionRepository,
+    @MockkBean private val inventoryCommandService: InventoryCommandService,
 ) : DescribeSpec({
     extensions(SpringExtension)
 
-    val cartSyncService = CartSyncService(cartRepository, cartConnectionRepository)
+    val cartSyncService = CartSyncService(cartRepository, cartConnectionRepository, inventoryCommandService)
 
     describe("CartSyncService#connectToCart") {
 
@@ -83,14 +84,27 @@ class CartSyncServiceTest(
 
     describe("CartSyncService#disconnectFromAllCarts") {
         val deviceId = DeviceId("device-xyz")
+        val cart1 = mockk<Cart>(relaxed = true)
+        val cart2 = mockk<Cart>(relaxed = true)
+
         lateinit var connection1: CartConnection
         lateinit var connection2: CartConnection
 
         beforeEach {
             connection1 = mockk<CartConnection>(relaxed = true)
             connection2 = mockk<CartConnection>(relaxed = true)
+
+            every { connection1.disconnect() } returns Unit
+            every { connection2.disconnect() } returns Unit
+
+            every { connection1.cart } returns cart1
+            every { connection2.cart } returns cart2
+
             every { cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns listOf(connection1, connection2)
-            every { cartConnectionRepository.saveAll(any()) } returns listOf(connection1, connection2)
+            every { cartConnectionRepository.save(connection1) } returns connection1
+            every { cartConnectionRepository.save(connection2) } returns connection2
+            every { inventoryCommandService.flushCartInventory(any()) } returns Unit
+
         }
 
         it("연결이 존재하는지 확인한다") {
@@ -99,17 +113,25 @@ class CartSyncServiceTest(
             verify(exactly = 1) { cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId) }
         }
 
-        it("모든 연결을 해제해야 한다") {
+        it("모든 연결을 해제 한다") {
             val result = cartSyncService.disconnectFromAllCarts(deviceId)
 
             verify(exactly = 1) { connection1.disconnect() }
             verify(exactly = 1) { connection2.disconnect() }
-            verify(exactly = 1) { cartConnectionRepository.saveAll(any()) }
+            verify(exactly = 1) { cartConnectionRepository.save(connection1) }
+            verify(exactly = 1) { cartConnectionRepository.save(connection2) }
 
             result shouldBe listOf(
-                CartConnectionStatus(connection1.cart.code, connection1.createdAt, connection1.connected),
-                CartConnectionStatus(connection2.cart.code, connection2.createdAt, connection2.connected)
+                CartConnectionStatus.of(connection1),
+                CartConnectionStatus.of(connection2)
             )
+        }
+
+        it("모든 연결된 카트의 인벤토리를 비운다") {
+            cartSyncService.disconnectFromAllCarts(deviceId)
+
+            verify(exactly = 1) { inventoryCommandService.flushCartInventory(cart1) }
+            verify(exactly = 1) { inventoryCommandService.flushCartInventory(cart2) }
         }
 
         context("연결이 존재하지 않을 때") {
@@ -120,7 +142,7 @@ class CartSyncServiceTest(
             it("아무 작업도 수행하지 않아야 한다") {
                 val result = cartSyncService.disconnectFromAllCarts(deviceId)
 
-                verify(exactly = 0) { cartConnectionRepository.saveAll(any()) }
+                verify(exactly = 0) { cartConnectionRepository.save(any()) }
 
                 result shouldBe emptyList()
             }
