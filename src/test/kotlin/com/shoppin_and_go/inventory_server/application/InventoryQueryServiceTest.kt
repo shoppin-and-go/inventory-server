@@ -57,13 +57,7 @@ class InventoryQueryServiceTest(
 
             result shouldBe CartInventoryStatus(
                 cartCode,
-                cartInventories.map {
-                    CartInventoryStatus.CartItem(
-                        it.product.name,
-                        it.quantity,
-                        it.product.price,
-                    )
-                }
+                cartInventories.map(CartInventoryStatus.CartItem::of)
             )
         }
 

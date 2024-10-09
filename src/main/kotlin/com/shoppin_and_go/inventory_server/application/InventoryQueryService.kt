@@ -23,13 +23,7 @@ class InventoryQueryService(
 
         return CartInventoryStatus(
             cart.code,
-            inventories.map {
-                CartInventoryStatus.CartItem(
-                    it.product.name,
-                    it.quantity,
-                    it.product.price,
-                )
-            }
+            inventories.map(CartInventoryStatus.CartItem::of)
         )
     }
 
