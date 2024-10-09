@@ -75,9 +75,10 @@ class DeviceConnectionControllerIntegrationTest(
             }
         }
 
-        context("기기와 이미 연결된 카트가 있는 경우") {
+        context("기기가 다른 카트와 연결되어 있는 경우") {
             beforeEach {
-                val connection = CartConnection(cart, deviceId)
+                val anotherCart = cartRepository.save(Cart(CartCode("XYZ456")))
+                val connection = CartConnection(anotherCart, deviceId)
                 cartConnectionRepository.save(connection)
             }
 
@@ -91,7 +92,28 @@ class DeviceConnectionControllerIntegrationTest(
                 )
                     .andExpect(status().isConflict)
                     .andExpect(jsonPath("$.code").value("ERROR"))
-                    .andExpect(jsonPath("$.message").value("This device is already connected to a cart: $deviceId"))
+                    .andExpect(jsonPath("$.message").value("This device is already connected with another cart"))
+            }
+        }
+
+        context("연결하려는 카트가 다른 기기와 연결되어 있는 경우") {
+            beforeEach {
+                val anotherDeviceId = DeviceId("device-abc")
+                val connection = CartConnection(cart, anotherDeviceId)
+                cartConnectionRepository.save(connection)
+            }
+
+            it("409 오류를 반환한다") {
+                val request = CartConnectRequest(deviceId, cartCode)
+
+                mockMvc.perform(
+                    post("/cart-connections")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+                    .andExpect(status().isConflict)
+                    .andExpect(jsonPath("$.code").value("ERROR"))
+                    .andExpect(jsonPath("$.message").value("This cart is already connected with another device"))
             }
         }
     }
