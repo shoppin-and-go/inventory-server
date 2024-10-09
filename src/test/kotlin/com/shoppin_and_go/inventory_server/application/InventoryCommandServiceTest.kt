@@ -119,4 +119,14 @@ class InventoryCommandServiceTest(
             }
         }
     }
+
+    describe("InventoryCommandService#flushCartInventory") {
+        it("카트 인벤토리를 모두 삭제한다") {
+            val service = buildService()
+
+            service.flushCartInventory(cart)
+
+            verify(exactly = 1) { cartInventoryRepository.deleteAllByCart(cart) }
+        }
+    }
 })

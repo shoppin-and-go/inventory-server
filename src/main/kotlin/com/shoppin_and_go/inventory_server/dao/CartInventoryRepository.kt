@@ -12,4 +12,5 @@ interface CartInventoryRepository : Repository<CartInventory, UUID> {
     fun findByCart(cart: Cart): List<CartInventory>
     fun save(cartInventory: CartInventory): CartInventory
     fun saveAll(cartInventories: Iterable<CartInventory>): List<CartInventory>
+    fun deleteAllByCart(cart: Cart)
 }

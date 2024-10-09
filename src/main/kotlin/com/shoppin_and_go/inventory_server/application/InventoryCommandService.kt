@@ -30,6 +30,10 @@ class InventoryCommandService(
         eventPublisher.publishEvent(event)
     }
 
+    fun flushCartInventory(cart: Cart) {
+        cartInventoryRepository.deleteAllByCart(cart)
+    }
+
     private fun getCart(code: CartCode): Cart {
         return cartRepository.findByCode(code) ?: throw CartNotFoundException(code)
     }
