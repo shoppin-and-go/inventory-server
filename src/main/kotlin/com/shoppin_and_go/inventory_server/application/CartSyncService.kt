@@ -2,6 +2,7 @@ package com.shoppin_and_go.inventory_server.application
 
 import com.shoppin_and_go.inventory_server.dao.CartConnectionRepository
 import com.shoppin_and_go.inventory_server.dao.CartRepository
+import com.shoppin_and_go.inventory_server.domain.Cart
 import com.shoppin_and_go.inventory_server.domain.CartCode
 import com.shoppin_and_go.inventory_server.domain.CartConnection
 import com.shoppin_and_go.inventory_server.domain.DeviceId
@@ -18,7 +19,7 @@ class CartSyncService(
     private val inventoryCommandService: InventoryCommandService,
 ) {
     fun connectToCart(code: CartCode, deviceId: DeviceId): CartConnectionStatus {
-        val cart = cartRepository.findByCode(code) ?: throw CartNotFoundException(code)
+        val cart = getCart(code)
         val connectionExistence = cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId)
 
         if (connectionExistence) throw DuplicateCartConnectionException(deviceId)
@@ -38,6 +39,10 @@ class CartSyncService(
         val connections = cartConnectionRepository.findByDeviceIdOrderByCreatedAtDesc(deviceId)
 
         return connections.map(CartConnectionStatus::of)
+    }
+
+    private fun getCart(code: CartCode): Cart {
+        return cartRepository.findByCode(code) ?: throw CartNotFoundException(code)
     }
 
     private fun disconnectFromCart(cartConnection: CartConnection): CartConnectionStatus {
