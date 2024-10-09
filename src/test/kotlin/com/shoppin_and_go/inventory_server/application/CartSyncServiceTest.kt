@@ -8,6 +8,7 @@ import com.shoppin_and_go.inventory_server.domain.CartCode
 import com.shoppin_and_go.inventory_server.domain.CartConnection
 import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.dto.CartConnectionStatus
+import com.shoppin_and_go.inventory_server.exception.AlreadyConnectedCartException
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
 import com.shoppin_and_go.inventory_server.exception.DuplicateCartConnectionException
 import io.kotest.assertions.throwables.shouldThrow
@@ -35,6 +36,7 @@ class CartSyncServiceTest(
 
         beforeEach {
             every { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns false
+            every { cartConnectionRepository.existsByCartAndDisconnectedAtIsNull(cart) } returns false
             every { cartRepository.findByCode(cartCode) } returns cart
         }
 
@@ -67,13 +69,27 @@ class CartSyncServiceTest(
             }
         }
 
-        context("연결이 이미 존재할 때") {
+        context("기기의 연결이 이미 존재할 때") {
             beforeEach {
                 every { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns true
             }
 
             it("DuplicateCartConnectionException을 던져야 한다") {
                 shouldThrow<DuplicateCartConnectionException> {
+                    cartSyncService.connectToCart(cartCode, deviceId)
+                }
+
+                verify(exactly = 0) { cartConnectionRepository.save(any()) }
+            }
+        }
+
+        context("카트의 연결이 이미 존재할 때") {
+            beforeEach {
+                every { cartConnectionRepository.existsByCartAndDisconnectedAtIsNull(cart) } returns true
+            }
+
+            it("AlreadyConnectedCartException을 던져야 한다") {
+                shouldThrow<AlreadyConnectedCartException> {
                     cartSyncService.connectToCart(cartCode, deviceId)
                 }
 

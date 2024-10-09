@@ -7,8 +7,10 @@ import com.shoppin_and_go.inventory_server.domain.CartCode
 import com.shoppin_and_go.inventory_server.domain.CartConnection
 import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.dto.CartConnectionStatus
+import com.shoppin_and_go.inventory_server.exception.AlreadyConnectedCartException
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
 import com.shoppin_and_go.inventory_server.exception.DuplicateCartConnectionException
+import com.shoppin_and_go.inventory_server.extensions.throwIfTrue
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,9 +22,9 @@ class CartSyncService(
 ) {
     fun connectToCart(code: CartCode, deviceId: DeviceId): CartConnectionStatus {
         val cart = getCart(code)
-        val connectionExistence = cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId)
 
-        if (connectionExistence) throw DuplicateCartConnectionException(deviceId)
+        checkDeviceConnected(deviceId).throwIfTrue { DuplicateCartConnectionException(deviceId) }
+        checkCartConnected(cart).throwIfTrue { AlreadyConnectedCartException() }
 
         val cartConnection = cart.createConnection(deviceId)
         return cartConnectionRepository.save(cartConnection).let(CartConnectionStatus::of)
@@ -43,6 +45,14 @@ class CartSyncService(
 
     private fun getCart(code: CartCode): Cart {
         return cartRepository.findByCode(code) ?: throw CartNotFoundException(code)
+    }
+
+    private fun checkDeviceConnected(deviceId: DeviceId): Boolean {
+        return cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId)
+    }
+
+    private fun checkCartConnected(cart: Cart): Boolean {
+        return cartConnectionRepository.existsByCartAndDisconnectedAtIsNull(cart)
     }
 
     private fun disconnectFromCart(cartConnection: CartConnection): CartConnectionStatus {
