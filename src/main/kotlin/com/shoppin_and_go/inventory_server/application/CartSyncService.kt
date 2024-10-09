@@ -7,9 +7,9 @@ import com.shoppin_and_go.inventory_server.domain.CartCode
 import com.shoppin_and_go.inventory_server.domain.CartConnection
 import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.dto.CartConnectionStatus
-import com.shoppin_and_go.inventory_server.exception.AlreadyConnectedCartException
+import com.shoppin_and_go.inventory_server.exception.CartAlreadyConnectedException
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
-import com.shoppin_and_go.inventory_server.exception.DuplicateCartConnectionException
+import com.shoppin_and_go.inventory_server.exception.DeviceAlreadyConnectedException
 import com.shoppin_and_go.inventory_server.extensions.throwIfTrue
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,8 +23,8 @@ class CartSyncService(
     fun connectToCart(code: CartCode, deviceId: DeviceId): CartConnectionStatus {
         val cart = getCart(code)
 
-        checkDeviceConnected(deviceId).throwIfTrue { DuplicateCartConnectionException(deviceId) }
-        checkCartConnected(cart).throwIfTrue { AlreadyConnectedCartException() }
+        checkDeviceConnected(deviceId).throwIfTrue { DeviceAlreadyConnectedException() }
+        checkCartConnected(cart).throwIfTrue { CartAlreadyConnectedException() }
 
         val cartConnection = cart.createConnection(deviceId)
         return cartConnectionRepository.save(cartConnection).let(CartConnectionStatus::of)

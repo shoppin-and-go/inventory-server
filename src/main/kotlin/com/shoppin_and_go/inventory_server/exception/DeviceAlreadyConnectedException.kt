@@ -3,7 +3,7 @@ package com.shoppin_and_go.inventory_server.exception
 import com.shoppin_and_go.inventory_server.domain.DeviceId
 import org.springframework.http.HttpStatus
 
-class DuplicateCartConnectionException(deviceId: DeviceId) : LogicalException() {
-    override val message = "This device is already connected to a cart: $deviceId"
+class DeviceAlreadyConnectedException : LogicalException() {
+    override val message = "This device is already connected with another cart"
     override val httpStatus = HttpStatus.CONFLICT
 }

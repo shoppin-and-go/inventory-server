@@ -8,9 +8,9 @@ import com.shoppin_and_go.inventory_server.domain.CartCode
 import com.shoppin_and_go.inventory_server.domain.CartConnection
 import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.dto.CartConnectionStatus
-import com.shoppin_and_go.inventory_server.exception.AlreadyConnectedCartException
+import com.shoppin_and_go.inventory_server.exception.CartAlreadyConnectedException
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
-import com.shoppin_and_go.inventory_server.exception.DuplicateCartConnectionException
+import com.shoppin_and_go.inventory_server.exception.DeviceAlreadyConnectedException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
@@ -75,7 +75,7 @@ class CartSyncServiceTest(
             }
 
             it("DuplicateCartConnectionException을 던져야 한다") {
-                shouldThrow<DuplicateCartConnectionException> {
+                shouldThrow<DeviceAlreadyConnectedException> {
                     cartSyncService.connectToCart(cartCode, deviceId)
                 }
 
@@ -89,7 +89,7 @@ class CartSyncServiceTest(
             }
 
             it("AlreadyConnectedCartException을 던져야 한다") {
-                shouldThrow<AlreadyConnectedCartException> {
+                shouldThrow<CartAlreadyConnectedException> {
                     cartSyncService.connectToCart(cartCode, deviceId)
                 }
 
