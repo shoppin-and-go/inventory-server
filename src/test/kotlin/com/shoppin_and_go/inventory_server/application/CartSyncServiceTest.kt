@@ -81,7 +81,7 @@ class CartSyncServiceTest(
         }
     }
 
-    describe("CartSyncService#disconnectAll") {
+    describe("CartSyncService#disconnectFromAllCarts") {
         val deviceId = DeviceId("device-xyz")
         lateinit var connection1: CartConnection
         lateinit var connection2: CartConnection
@@ -94,13 +94,13 @@ class CartSyncServiceTest(
         }
 
         it("연결이 존재하는지 확인한다") {
-            cartSyncService.disconnectAll(deviceId)
+            cartSyncService.disconnectFromAllCarts(deviceId)
 
             verify(exactly = 1) { cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId) }
         }
 
         it("모든 연결을 해제해야 한다") {
-            val result = cartSyncService.disconnectAll(deviceId)
+            val result = cartSyncService.disconnectFromAllCarts(deviceId)
 
             verify(exactly = 1) { connection1.disconnect() }
             verify(exactly = 1) { connection2.disconnect() }
@@ -118,7 +118,7 @@ class CartSyncServiceTest(
             }
 
             it("아무 작업도 수행하지 않아야 한다") {
-                val result = cartSyncService.disconnectAll(deviceId)
+                val result = cartSyncService.disconnectFromAllCarts(deviceId)
 
                 verify(exactly = 0) { cartConnectionRepository.saveAll(any()) }
 

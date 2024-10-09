@@ -25,7 +25,7 @@ class CartSyncService(
         return cartConnectionRepository.save(cartConnection).let(::convertToCartConnectionStatus)
     }
 
-    fun disconnectAll(deviceId: DeviceId): List<CartConnectionStatus> {
+    fun disconnectFromAllCarts(deviceId: DeviceId): List<CartConnectionStatus> {
         val existConnections = cartConnectionRepository.findByDeviceIdAndDisconnectedAtIsNull(deviceId)
         if (existConnections.isEmpty()) return emptyList()
 

@@ -38,7 +38,7 @@ class DeviceConnectionController(
     fun disconnectAll(
         @PathVariable deviceId: DeviceId
     ): ApiResponse<List<CartConnectionStatus>> {
-        val cartConnectionStatues = cartSyncService.disconnectAll(deviceId)
+        val cartConnectionStatues = cartSyncService.disconnectFromAllCarts(deviceId)
 
         return ApiResponse.success("connections", cartConnectionStatues)
     }
