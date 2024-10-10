@@ -1,4 +1,5 @@
-![example workflow](https://github.com/shoppin-and-go/inventory-server/actions/workflows/ci.yml/badge.svg?branch=main)
+![ci](https://github.com/shoppin-and-go/inventory-server/actions/workflows/integration.yml/badge.svg?branch=main)
+![cd](https://github.com/shoppin-and-go/inventory-server/actions/workflows/deployment.yml/badge.svg?branch=main)
 
 # inventory-server
 카트에 있는 QR코드를 스캔하여 앱과 연동하고, 카트의 상품을 실시간으로 앱을 통해 확인할 수 있는 서비스입니다.
