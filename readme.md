@@ -9,14 +9,61 @@
 - 카트에 상품이 추가/제거 되었을 때 앱에 소켓을 통해 이벤트 발행
 - 카트에 있는 상품을 조회하는 API
 
-## Schedule
-- [x] 4주차(09/23 ~ 09/29): 아키텍쳐 설계 및 DB 설계
-- [x] 5주차(09/30 ~ 10/06): 카트 ID와 상품 ID를 전달받아 앱과 카트를 연동하는 API 구현
-- [x] 6주차(10/07 ~ 10/13): 카트에 상품을 추가/제거할 수 있는 API 구현
-- [x] 7주차(10/14 ~ 10/20): 앱과의 소켓 연결 구현
-- [x] 8주차(10/21 ~ 10/27): 카트의 인벤토리를 조회할 수 있는 API 개발
-- [x] 9주차(10/28 ~ 11/03): 인벤토리에 상품이 추가되었을 때 앱에 소켓으로 이벤트를 보내는 로직 개발
-- [ ] 10주차(11/04 ~ 11/10): 배포 환경 구성
-- [ ] 11주차(11/11 ~): AI 모델 통합 및 테스트
-- [ ] 12주차(11/18 ~): 최종 테스트 및 배포
+## How to run
+Amazon ECR의 이미지를 사용하여 서버를 실행할 수 있습니다
 
+**Docker**
+```bash
+docker run -d \
+  -e SPRING_PROFILES_ACTIVE=dev \
+  -e SPRING_DATASOURCE_URL=jdbc:mysql://<DB_HOST>:<DB_PORT>/<DB_NAME>?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8 \
+  -e SPRING_DATASOURCE_USERNAME=<DB_USERNAME> \
+  -e SPRING_DATASOURCE_PASSWORD=<DB_PASSWORD> \
+  -e SERVER_PORT=8080 \
+  -p 8080:8080 \
+  public.ecr.aws/e6u1y0g6/shoppin-and-go/inventory-server:latest
+```
+
+**Docker compose**
+```yaml
+services:
+  inventory-server:
+    image: public.ecr.aws/e6u1y0g6/shoppin-and-go/inventory-server:latest
+    container_name: inventory-server
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/inventory_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: inventory_server_application
+      SPRING_DATASOURCE_PASSWORD: securepassword
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  db:
+    image: mysql:8.0.39
+    container_name: db
+    environment:
+      MYSQL_DATABASE: inventory_db
+      MYSQL_USER: inventory_server_application
+      MYSQL_PASSWORD: securepassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+```
+
+### Environment Variables
+| Name                       | Description    | Default Value | Required |
+|----------------------------|----------------|:-------------:|:--------:|
+| SPRING_DATASOURCE_URL      | MySQL URL      |       -       |    O     |  
+| SPRING_DATASOURCE_USERNAME | MySQL username |       -       |    O     | 
+| SPRING_DATASOURCE_PASSWORD | MySQL password |       -       |    O     |
+| SPRING_PROFILES_ACTIVE     | profile        |      dev      |    X     |
+| SERVER_PORT                | Server port    |     8080      |    X     |

@@ -1,0 +1,31 @@
+services:
+  inventory-server:
+    image: public.ecr.aws/e6u1y0g6/shoppin-and-go/inventory-server:latest
+    container_name: inventory-server
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/inventory_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: inventory_server_application
+      SPRING_DATASOURCE_PASSWORD: securepassword
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  db:
+    image: mysql:8.0.39
+    container_name: db
+    environment:
+      MYSQL_DATABASE: inventory_db
+      MYSQL_USER: inventory_server_application
+      MYSQL_PASSWORD: securepassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

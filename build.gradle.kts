@@ -1,9 +1,10 @@
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
+	kotlin("plugin.jpa") version "1.9.25"
 	id("org.springframework.boot") version "3.3.4"
 	id("io.spring.dependency-management") version "1.1.6"
-	kotlin("plugin.jpa") version "1.9.25"
+	id("com.google.cloud.tools.jib") version "3.4.3"
 }
 
 group = "com.shoppin-and-go"
@@ -26,9 +27,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-websocket")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("com.github.f4b6a3:ulid-creator:5.2.3")
+	implementation("com.mysql:mysql-connector-j:8.2.0")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -51,4 +54,37 @@ kotlin {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+jib {
+	from {
+		image = "amazoncorretto:22-alpine"
+		platforms {
+			platform {
+				architecture = "arm64"
+				os = "linux"
+			}
+		}
+	}
+	to {
+		image = "public.ecr.aws/e6u1y0g6/shoppin-and-go/inventory-server"
+		tags = mutableSetOf("latest", "${version}_${System.currentTimeMillis()}")
+		setCredHelper("ecr-login")
+	}
+	container {
+		creationTime = "USE_CURRENT_TIMESTAMP"
+		jvmFlags = listOf(
+			"-Dfile.encoding=UTF-8",
+			"-Xms128m",
+			"-Xmx128m",
+			"-XX:+UseContainerSupport",
+			"-XX:+DisableExplicitGC"
+		)
+		ports = listOf("8080")
+
+		environment = mapOf(
+			"SPRING_PROFILES_ACTIVE" to "dev",
+			"SERVER_PORT" to "8080",
+		)
+	}
 }

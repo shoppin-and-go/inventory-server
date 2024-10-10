@@ -13,7 +13,7 @@ import java.util.*
 @MappedSuperclass
 abstract class BaseEntity {
     @Id
-    @Column(columnDefinition = "uuid")
+    @Column(columnDefinition = "BINARY(16)")
     val id: UUID = UlidCreator.getMonotonicUlid().toUuid()
 
     @CreatedDate
