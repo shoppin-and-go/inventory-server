@@ -8,7 +8,9 @@ on:
       - main
     types:
       - completed
-
+permissions:
+  id-token: write
+  contents: read
 jobs:
   deploy:
     name: Deploy to AWS
