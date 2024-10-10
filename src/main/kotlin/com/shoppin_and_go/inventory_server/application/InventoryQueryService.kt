@@ -16,8 +16,7 @@ class InventoryQueryService(
     private val cartInventoryRepository: CartInventoryRepository,
 ) {
     fun listInventory(deviceId: DeviceId, cartCode: CartCode): CartInventoryStatus {
-        val cart = getCart(cartCode)
-        checkAuthority(deviceId, cart)
+        val cart = getAuthorizedCart(deviceId, cartCode)
 
         val inventories = cartInventoryRepository.findByCart(cart)
 
@@ -25,6 +24,10 @@ class InventoryQueryService(
             cart.code,
             inventories.map(CartInventoryStatus.CartItem::of)
         )
+    }
+
+    private fun getAuthorizedCart(deviceId: DeviceId, cartCode: CartCode): Cart {
+        return getCart(cartCode).also { checkAuthority(deviceId, it) }
     }
 
     private fun getCart(cartCode: CartCode): Cart {
