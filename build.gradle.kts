@@ -58,7 +58,7 @@ tasks.withType<Test> {
 
 jib {
 	from {
-		image = "amazoncorretto:22-alpine"
+		image = "amazoncorretto:21-alpine"
 		platforms {
 			platform {
 				architecture = "arm64"
