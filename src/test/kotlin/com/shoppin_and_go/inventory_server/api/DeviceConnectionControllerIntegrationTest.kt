@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.shoppin_and_go.inventory_server.dao.CartConnectionRepository
 import com.shoppin_and_go.inventory_server.dao.CartRepository
 import com.shoppin_and_go.inventory_server.domain.Cart
-import com.shoppin_and_go.inventory_server.domain.CartCode
 import com.shoppin_and_go.inventory_server.domain.CartConnection
-import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.dto.CartConnectRequest
+import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,9 +31,11 @@ class DeviceConnectionControllerIntegrationTest(
 ) : DescribeSpec({
     extensions(SpringExtension)
 
+    val cartBuilder = FixtureBuilders.get<Cart>()
+
     describe("POST /cart-connections") {
-        val deviceId = DeviceId("device-xyz")
-        val cartCode = CartCode("ABC123")
+        val deviceId = FixtureBuilders.deviceId()
+        val cartCode = FixtureBuilders.cartCode()
         lateinit var cart: Cart
 
         beforeEach {
@@ -77,7 +78,7 @@ class DeviceConnectionControllerIntegrationTest(
 
         context("기기가 다른 카트와 연결되어 있는 경우") {
             beforeEach {
-                val anotherCart = cartRepository.save(Cart(CartCode("XYZ456")))
+                val anotherCart = cartRepository.save(cartBuilder.sample())
                 val connection = CartConnection(anotherCart, deviceId)
                 cartConnectionRepository.save(connection)
             }
@@ -98,7 +99,7 @@ class DeviceConnectionControllerIntegrationTest(
 
         context("연결하려는 카트가 다른 기기와 연결되어 있는 경우") {
             beforeEach {
-                val anotherDeviceId = DeviceId("device-abc")
+                val anotherDeviceId = FixtureBuilders.deviceId()
                 val connection = CartConnection(cart, anotherDeviceId)
                 cartConnectionRepository.save(connection)
             }
@@ -119,15 +120,15 @@ class DeviceConnectionControllerIntegrationTest(
     }
 
     describe("GET /devices/{deviceId}/cart-connections") {
-        val deviceId = DeviceId("device-abc")
-        val otherDeviceId = DeviceId("device-xyz")
+        val deviceId = FixtureBuilders.deviceId()
+        val otherDeviceId = FixtureBuilders.deviceId()
 
         lateinit var firstConnection: CartConnection
         lateinit var secondConnection: CartConnection
 
         beforeEach {
-            val cartOne = cartRepository.save(Cart(CartCode("cart-001")))
-            val cartTwo = cartRepository.save(Cart(CartCode("cart-002")))
+            val cartOne = cartRepository.save(cartBuilder.sample())
+            val cartTwo = cartRepository.save(cartBuilder.sample())
 
             firstConnection = cartConnectionRepository.save(CartConnection(cartOne, deviceId))
             cartConnectionRepository.save(CartConnection(cartOne, otherDeviceId))
@@ -155,12 +156,12 @@ class DeviceConnectionControllerIntegrationTest(
     }
 
     describe("DELETE /devices/{deviceId}/cart-connections") {
-        val deviceId = DeviceId("device-abc")
-        val otherDeviceId = DeviceId("device-xyz")
+        val deviceId = FixtureBuilders.deviceId()
+        val otherDeviceId = FixtureBuilders.deviceId()
 
         beforeEach {
-            val cartOne = cartRepository.save(Cart(CartCode("cart-001")))
-            val cartTwo = cartRepository.save(Cart(CartCode("cart-002")))
+            val cartOne = cartRepository.save(cartBuilder.sample())
+            val cartTwo = cartRepository.save(cartBuilder.sample())
 
             cartConnectionRepository.save(CartConnection(cartOne, deviceId))
             cartConnectionRepository.save(CartConnection(cartOne, otherDeviceId))

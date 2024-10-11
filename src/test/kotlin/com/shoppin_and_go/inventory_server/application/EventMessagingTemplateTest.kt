@@ -1,8 +1,8 @@
 package com.shoppin_and_go.inventory_server.application
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.event.AbstractEvent
+import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.mockk
 import io.mockk.verify
@@ -20,7 +20,7 @@ class EventMessagingTemplateTest : DescribeSpec({
     }
 
     describe("EventMessagingTemplate#sendToDevice") {
-        val deviceId = DeviceId("device-xyz")
+        val deviceId = FixtureBuilders.deviceId()
         val event = object : AbstractEvent {
             override val name: String = "AnyTestEvent"
             override val timestamp: Instant = Instant.now()

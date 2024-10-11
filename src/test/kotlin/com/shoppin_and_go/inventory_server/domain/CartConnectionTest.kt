@@ -1,13 +1,16 @@
 package com.shoppin_and_go.inventory_server.domain
 
+import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 
 class CartConnectionTest : DescribeSpec({
+    val cartBuilder = FixtureBuilders.get<Cart>()
+
     describe("CartConnection#disconnect") {
         it("sets disconnectedAt") {
-            val cart = Cart(CartCode("ABC123"))
-            val deviceId = DeviceId("device-xyz")
+            val cart = cartBuilder.sample()
+            val deviceId = FixtureBuilders.deviceId()
             val connection = cart.createConnection(deviceId)
 
             connection.disconnect()
@@ -20,8 +23,8 @@ class CartConnectionTest : DescribeSpec({
         lateinit var connection: CartConnection
 
         beforeEach {
-            val cart = Cart(CartCode("ABC123"))
-            val deviceId = DeviceId("device-xyz")
+            val cart = cartBuilder.sample()
+            val deviceId = FixtureBuilders.deviceId()
             connection = cart.createConnection(deviceId)
         }
 

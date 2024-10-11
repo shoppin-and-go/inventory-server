@@ -1,16 +1,16 @@
 package com.shoppin_and_go.inventory_server.application
 
+import com.navercorp.fixturemonkey.kotlin.setExp
 import com.ninjasquad.springmockk.MockkBean
 import com.shoppin_and_go.inventory_server.dao.CartConnectionRepository
 import com.shoppin_and_go.inventory_server.dao.CartRepository
 import com.shoppin_and_go.inventory_server.domain.Cart
-import com.shoppin_and_go.inventory_server.domain.CartCode
 import com.shoppin_and_go.inventory_server.domain.CartConnection
-import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.dto.CartConnectionStatus
 import com.shoppin_and_go.inventory_server.exception.CartAlreadyConnectedException
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
 import com.shoppin_and_go.inventory_server.exception.DeviceAlreadyConnectedException
+import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
@@ -30,9 +30,9 @@ class CartSyncServiceTest(
 
     describe("CartSyncService#connectToCart") {
 
-        val cartCode = CartCode("ABC123")
-        val deviceId = DeviceId("device-xyz")
-        val cart = Cart(cartCode)
+        val cartCode = FixtureBuilders.cartCode()
+        val deviceId = FixtureBuilders.deviceId()
+        val cart = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode).sample()
 
         beforeEach {
             every { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns false
@@ -99,7 +99,7 @@ class CartSyncServiceTest(
     }
 
     describe("CartSyncService#disconnectFromAllCarts") {
-        val deviceId = DeviceId("device-xyz")
+        val deviceId = FixtureBuilders.deviceId()
         val cart1 = mockk<Cart>(relaxed = true)
         val cart2 = mockk<Cart>(relaxed = true)
 
@@ -166,7 +166,7 @@ class CartSyncServiceTest(
     }
 
     describe("CartSyncService#listCartConnections") {
-        val deviceId = DeviceId("device-xyz")
+        val deviceId = FixtureBuilders.deviceId()
 
         val connection1 = mockk<CartConnection>(relaxed = true)
         val connection2 = mockk<CartConnection>(relaxed = true)

@@ -1,18 +1,14 @@
 package com.shoppin_and_go.inventory_server.domain
 
-import com.navercorp.fixturemonkey.FixtureMonkey
-import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
-import com.navercorp.fixturemonkey.kotlin.giveMeBuilder
 import com.shoppin_and_go.inventory_server.exception.InvalidQuantityException
+import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 
 class CartInventoryTest : DescribeSpec({
-    val fixtureMonkey = FixtureMonkey.builder().plugin(KotlinPlugin()).build()
-
-    val cart = fixtureMonkey.giveMeBuilder<Cart>().sample()
-    val product = fixtureMonkey.giveMeBuilder<Product>().sample()
+    val cartBuilder = FixtureBuilders.get<Cart>()
+    val productBuilder = FixtureBuilders.get<Product>()
 
     describe("CartInventoryTest#changeQuantity") {
         var quantityChange: Int
@@ -21,6 +17,9 @@ class CartInventoryTest : DescribeSpec({
             quantityChange = 0
 
             it("상품 수량 오류를 던진다") {
+                val cart = cartBuilder.sample()
+                val product = productBuilder.sample()
+
                 val inventory = CartInventory(cart, product)
 
                 val exception = shouldThrow<InvalidQuantityException> { inventory.changeQuantity(quantityChange) }
@@ -33,6 +32,9 @@ class CartInventoryTest : DescribeSpec({
             quantityChange = 3
 
             it("재고를 증가시킨다") {
+                val cart = cartBuilder.sample()
+                val product = productBuilder.sample()
+
                 val inventory = CartInventory(cart, product)
                 val beforeQuantity = inventory.quantity
 
@@ -46,6 +48,9 @@ class CartInventoryTest : DescribeSpec({
             quantityChange = -3
 
             it("재고를 감소시킨다") {
+                val cart = cartBuilder.sample()
+                val product = productBuilder.sample()
+
                 val inventory = CartInventory(cart, product).apply { changeQuantity(7) }
 
                 val beforeQuantity = inventory.quantity
@@ -59,6 +64,9 @@ class CartInventoryTest : DescribeSpec({
                 quantityChange = -3
 
                 it("재고 수량 오류를 던진다") {
+                    val cart = cartBuilder.sample()
+                    val product = productBuilder.sample()
+
                     val inventory = CartInventory(cart, product).apply { changeQuantity(2) }
 
                     val exception = shouldThrow<InvalidQuantityException> { inventory.changeQuantity(quantityChange) }

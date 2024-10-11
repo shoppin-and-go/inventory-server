@@ -1,25 +1,20 @@
 package com.shoppin_and_go.inventory_server.application
 
-import com.navercorp.fixturemonkey.FixtureMonkey
-import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
-import com.navercorp.fixturemonkey.kotlin.giveMeBuilder
 import com.navercorp.fixturemonkey.kotlin.setExp
 import com.ninjasquad.springmockk.MockkBean
 import com.shoppin_and_go.inventory_server.dao.CartConnectionRepository
 import com.shoppin_and_go.inventory_server.dao.CartRepository
 import com.shoppin_and_go.inventory_server.domain.Cart
-import com.shoppin_and_go.inventory_server.domain.CartCode
-import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.domain.Product
 import com.shoppin_and_go.inventory_server.dto.CartInventoryStatus
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
 import com.shoppin_and_go.inventory_server.exception.UnauthorizedCartException
+import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.verify
-import java.util.*
 
 class InventoryQueryServiceTest(
     @MockkBean private val cartRepository: CartRepository,
@@ -28,14 +23,12 @@ class InventoryQueryServiceTest(
     describe("InventoryQueryService#listInventory") {
         val service = InventoryQueryService(cartRepository, cartConnectionRepository)
 
-        val fixtureMonkey = FixtureMonkey.builder().plugin(KotlinPlugin()).build()
-
-        val deviceId = DeviceId("device-test_${UUID.randomUUID()}")
-        val cartCode = CartCode("cart-test_${UUID.randomUUID()}")
-        val cart = fixtureMonkey.giveMeBuilder<Cart>().setExp(Cart::code, cartCode).sample().apply {
-            changeProductQuantity(fixtureMonkey.giveMeBuilder<Product>().sample(), 1)
-            changeProductQuantity(fixtureMonkey.giveMeBuilder<Product>().sample(), 2)
-            changeProductQuantity(fixtureMonkey.giveMeBuilder<Product>().sample(), 3)
+        val deviceId = FixtureBuilders.deviceId()
+        val cartCode = FixtureBuilders.cartCode()
+        val cart = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode).sample().apply {
+            changeProductQuantity(FixtureBuilders.get<Product>().sample(), 1)
+            changeProductQuantity(FixtureBuilders.get<Product>().sample(), 2)
+            changeProductQuantity(FixtureBuilders.get<Product>().sample(), 3)
         }
 
         beforeEach {

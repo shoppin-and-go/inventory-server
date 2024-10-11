@@ -1,16 +1,16 @@
 package com.shoppin_and_go.inventory_server.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.navercorp.fixturemonkey.FixtureMonkey
-import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
-import com.navercorp.fixturemonkey.kotlin.giveMeBuilder
 import com.navercorp.fixturemonkey.kotlin.setExp
 import com.shoppin_and_go.inventory_server.dao.CartConnectionRepository
 import com.shoppin_and_go.inventory_server.dao.CartRepository
 import com.shoppin_and_go.inventory_server.dao.ProductRepository
-import com.shoppin_and_go.inventory_server.domain.*
+import com.shoppin_and_go.inventory_server.domain.Cart
+import com.shoppin_and_go.inventory_server.domain.CartConnection
+import com.shoppin_and_go.inventory_server.domain.Product
 import com.shoppin_and_go.inventory_server.dto.InventoryUpdateRequest
 import com.shoppin_and_go.inventory_server.event.InventoryChangeEvent
+import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
@@ -45,16 +45,14 @@ class InventoryControllerTest(
 
     override fun extensions() = listOf(SpringExtension)
 
-    val fixtureMonkey: FixtureMonkey = FixtureMonkey.builder().plugin(KotlinPlugin()).build()
-
     init {
         this.describe("PATCH /carts/{cartCode}/inventories") {
             lateinit var cart: Cart
-            val cartCode = CartCode("cart-test_${UUID.randomUUID()}")
-            val productCode = ProductCode("product-test_${UUID.randomUUID()}")
+            val cartCode = FixtureBuilders.cartCode()
+            val productCode = FixtureBuilders.productCode()
 
-            val cartFixtureBuilder = fixtureMonkey.giveMeBuilder<Cart>().setExp(Cart::code, cartCode)
-            val productFixtureBuilder = fixtureMonkey.giveMeBuilder<Product>().setExp(Product::code, productCode)
+            val cartFixtureBuilder = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode)
+            val productFixtureBuilder = FixtureBuilders.get<Product>().setExp(Product::code, productCode)
 
             beforeEach {
                 val product = productFixtureBuilder.sample()
@@ -107,11 +105,11 @@ class InventoryControllerTest(
         this.describe("GET /devices/{deviceId}/carts/{cartCode}/inventories") {
             lateinit var cart: Cart
             lateinit var cartConnection: CartConnection
-            val deviceId = DeviceId("device-test_${UUID.randomUUID()}")
-            val cartCode = CartCode("cart-test_${UUID.randomUUID()}")
+            val deviceId = FixtureBuilders.deviceId()
+            val cartCode = FixtureBuilders.cartCode()
 
-            val cartFixtureBuilder = fixtureMonkey.giveMeBuilder<Cart>().setExp(Cart::code, cartCode)
-            val productFixtureBuilder = fixtureMonkey.giveMeBuilder<Product>()
+            val cartFixtureBuilder = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode)
+            val productFixtureBuilder = FixtureBuilders.get<Product>()
 
             beforeEach {
                 val products = productFixtureBuilder.sampleList(2)
@@ -142,7 +140,7 @@ class InventoryControllerTest(
             }
 
             context("코드에 해당하는 카트가 없을 때") {
-                val invalidCartCode = CartCode("invalid-cart-code")
+                val invalidCartCode = FixtureBuilders.cartCode()
 
                 it("400을 응답한다") {
                     mockMvc.perform(

@@ -1,23 +1,18 @@
 package com.shoppin_and_go.inventory_server.domain
 
-import com.navercorp.fixturemonkey.FixtureMonkey
-import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
-import com.navercorp.fixturemonkey.kotlin.giveMeBuilder
+import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import java.util.*
 
 
 class CartTest : DescribeSpec({
-    val fixtureMonkey = FixtureMonkey.builder().plugin(KotlinPlugin()).build()
-
-    val cartFixtureBuilder = fixtureMonkey.giveMeBuilder<Cart>()
-    val productFixtureBuilder = fixtureMonkey.giveMeBuilder<Product>()
+    val cartFixtureBuilder = FixtureBuilders.get<Cart>()
+    val productFixtureBuilder = FixtureBuilders.get<Product>()
 
     describe("Cart#createConnection") {
         it("returns a CartConnection") {
             val cart = cartFixtureBuilder.sample()
-            val deviceId = DeviceId("device-xyz")
+            val deviceId = FixtureBuilders.deviceId()
 
             val connection = cart.createConnection(deviceId)
 
@@ -29,7 +24,7 @@ class CartTest : DescribeSpec({
     describe("Cart#changeProductQuantity") {
         lateinit var cart: Cart
         lateinit var product: Product
-        val quantityChange = Random().nextInt(1, 10)
+        val quantityChange = FixtureBuilders.int()
 
         beforeEach {
             cart = cartFixtureBuilder.sample()
@@ -69,7 +64,7 @@ class CartTest : DescribeSpec({
         }
 
         context("카트에 동일한 상품이 있는 경우") {
-            val initialQuantity = 1
+            val initialQuantity = FixtureBuilders.int()
 
             beforeEach {
                 cart.changeProductQuantity(product, initialQuantity)

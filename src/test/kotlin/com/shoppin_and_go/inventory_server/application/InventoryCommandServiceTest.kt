@@ -1,20 +1,16 @@
 package com.shoppin_and_go.inventory_server.application
 
-import com.navercorp.fixturemonkey.FixtureMonkey
-import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
-import com.navercorp.fixturemonkey.kotlin.giveMeBuilder
 import com.navercorp.fixturemonkey.kotlin.setExp
 import com.ninjasquad.springmockk.MockkBean
 import com.shoppin_and_go.inventory_server.dao.CartRepository
 import com.shoppin_and_go.inventory_server.dao.ProductRepository
 import com.shoppin_and_go.inventory_server.domain.Cart
-import com.shoppin_and_go.inventory_server.domain.CartCode
 import com.shoppin_and_go.inventory_server.domain.Product
-import com.shoppin_and_go.inventory_server.domain.ProductCode
 import com.shoppin_and_go.inventory_server.dto.InventoryUpdateRequest
 import com.shoppin_and_go.inventory_server.event.InventoryChangeEvent
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
 import com.shoppin_and_go.inventory_server.exception.ProductNotFoundException
+import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.every
@@ -22,26 +18,23 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import org.springframework.context.ApplicationEventPublisher
-import java.util.*
 
 class InventoryCommandServiceTest(
     @MockkBean(relaxed = true) private val cartRepository: CartRepository,
     @MockkBean(relaxed = true) private val productRepository: ProductRepository,
 ) : DescribeSpec({
-    val fixtureMonkey = FixtureMonkey.builder().plugin(KotlinPlugin()).build()
-
     fun buildService() = InventoryCommandService(
         cartRepository,
         productRepository,
         mockk(relaxed = true)
     )
 
-    val cartCode = CartCode("cart-test_${UUID.randomUUID()}")
-    val productCode = ProductCode("product-test_${UUID.randomUUID()}")
+    val cartCode = FixtureBuilders.cartCode()
+    val productCode = FixtureBuilders.productCode()
     val request = InventoryUpdateRequest(productCode, 1)
 
-    val cartFixtureBuilder = fixtureMonkey.giveMeBuilder<Cart>().setExp(Cart::code, cartCode)
-    val productFixtureBuilder = fixtureMonkey.giveMeBuilder<Product>().setExp(Product::code, productCode)
+    val cartFixtureBuilder = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode)
+    val productFixtureBuilder = FixtureBuilders.get<Product>().setExp(Product::code, productCode)
 
     beforeEach {
         every { cartRepository.findByCode(cartCode) } answers { cartFixtureBuilder.sample() }
