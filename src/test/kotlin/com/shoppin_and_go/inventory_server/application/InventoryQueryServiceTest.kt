@@ -25,10 +25,10 @@ class InventoryQueryServiceTest(
 
         val deviceId = FixtureBuilders.deviceId()
         val cartCode = FixtureBuilders.cartCode()
-        val cart = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode).sample().apply {
-            changeProductQuantity(FixtureBuilders.get<Product>().sample(), 1)
-            changeProductQuantity(FixtureBuilders.get<Product>().sample(), 2)
-            changeProductQuantity(FixtureBuilders.get<Product>().sample(), 3)
+        val cart = FixtureBuilders.builder<Cart>().setExp(Cart::code, cartCode).sample().apply {
+            changeProductQuantity(FixtureBuilders.builder<Product>().sample(), 1)
+            changeProductQuantity(FixtureBuilders.builder<Product>().sample(), 2)
+            changeProductQuantity(FixtureBuilders.builder<Product>().sample(), 3)
         }
 
         beforeEach {

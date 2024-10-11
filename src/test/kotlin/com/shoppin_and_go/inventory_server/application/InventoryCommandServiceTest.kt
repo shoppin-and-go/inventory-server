@@ -33,8 +33,8 @@ class InventoryCommandServiceTest(
     val productCode = FixtureBuilders.productCode()
     val request = InventoryUpdateRequest(productCode, 1)
 
-    val cartFixtureBuilder = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode)
-    val productFixtureBuilder = FixtureBuilders.get<Product>().setExp(Product::code, productCode)
+    val cartFixtureBuilder = FixtureBuilders.builder<Cart>().setExp(Cart::code, cartCode)
+    val productFixtureBuilder = FixtureBuilders.builder<Product>().setExp(Product::code, productCode)
 
     beforeEach {
         every { cartRepository.findByCode(cartCode) } answers { cartFixtureBuilder.sample() }

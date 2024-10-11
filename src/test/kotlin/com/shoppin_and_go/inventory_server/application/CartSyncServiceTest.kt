@@ -32,7 +32,7 @@ class CartSyncServiceTest(
 
         val cartCode = FixtureBuilders.cartCode()
         val deviceId = FixtureBuilders.deviceId()
-        val cart = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode).sample()
+        val cart = FixtureBuilders.builder<Cart>().setExp(Cart::code, cartCode).sample()
 
         beforeEach {
             every { cartConnectionRepository.existsByDeviceIdAndDisconnectedAtIsNull(deviceId) } returns false

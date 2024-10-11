@@ -6,8 +6,8 @@ import io.kotest.matchers.shouldBe
 
 
 class CartTest : DescribeSpec({
-    val cartFixtureBuilder = FixtureBuilders.get<Cart>()
-    val productFixtureBuilder = FixtureBuilders.get<Product>()
+    val cartFixtureBuilder = FixtureBuilders.builder<Cart>()
+    val productFixtureBuilder = FixtureBuilders.builder<Product>()
 
     describe("Cart#createConnection") {
         it("returns a CartConnection") {

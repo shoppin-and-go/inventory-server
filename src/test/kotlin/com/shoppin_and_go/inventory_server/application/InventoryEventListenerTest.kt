@@ -18,13 +18,13 @@ class InventoryEventListenerTest(
 ) : DescribeSpec({
     val inventoryEventListener = InventoryEventListener(cartConnectionRepository, eventMessagingTemplate)
 
-    val cartBuilder = FixtureBuilders.get<Cart>()
+    val cartBuilder = FixtureBuilders.builder<Cart>()
 
     val cartOne = cartBuilder.sample()
     val cartTwo = cartBuilder.sample()
 
-    val cartOneConnectionBuilder = FixtureBuilders.get<CartConnection>().setExp(CartConnection::cart, cartOne)
-    val cartTwoConnectionBuilder = FixtureBuilders.get<CartConnection>().setExp(CartConnection::cart, cartTwo)
+    val cartOneConnectionBuilder = FixtureBuilders.builder<CartConnection>().setExp(CartConnection::cart, cartOne)
+    val cartTwoConnectionBuilder = FixtureBuilders.builder<CartConnection>().setExp(CartConnection::cart, cartTwo)
 
     val cartOneFirstConn = cartOneConnectionBuilder.sample()
     val cartOneSecondConn = cartOneConnectionBuilder.sample()

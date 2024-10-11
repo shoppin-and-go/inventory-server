@@ -31,7 +31,7 @@ class DeviceConnectionControllerIntegrationTest(
 ) : DescribeSpec({
     extensions(SpringExtension)
 
-    val cartBuilder = FixtureBuilders.get<Cart>()
+    val cartBuilder = FixtureBuilders.builder<Cart>()
 
     describe("POST /cart-connections") {
         val deviceId = FixtureBuilders.deviceId()

@@ -7,8 +7,8 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 
 class CartInventoryTest : DescribeSpec({
-    val cartBuilder = FixtureBuilders.get<Cart>()
-    val productBuilder = FixtureBuilders.get<Product>()
+    val cartBuilder = FixtureBuilders.builder<Cart>()
+    val productBuilder = FixtureBuilders.builder<Product>()
 
     describe("CartInventoryTest#changeQuantity") {
         var quantityChange: Int

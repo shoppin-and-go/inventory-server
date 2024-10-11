@@ -5,7 +5,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 
 class CartConnectionTest : DescribeSpec({
-    val cartBuilder = FixtureBuilders.get<Cart>()
+    val cartBuilder = FixtureBuilders.builder<Cart>()
 
     describe("CartConnection#disconnect") {
         it("sets disconnectedAt") {

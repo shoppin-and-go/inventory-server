@@ -51,8 +51,8 @@ class InventoryControllerTest(
             val cartCode = FixtureBuilders.cartCode()
             val productCode = FixtureBuilders.productCode()
 
-            val cartFixtureBuilder = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode)
-            val productFixtureBuilder = FixtureBuilders.get<Product>().setExp(Product::code, productCode)
+            val cartFixtureBuilder = FixtureBuilders.builder<Cart>().setExp(Cart::code, cartCode)
+            val productFixtureBuilder = FixtureBuilders.builder<Product>().setExp(Product::code, productCode)
 
             beforeEach {
                 val product = productFixtureBuilder.sample()
@@ -108,8 +108,8 @@ class InventoryControllerTest(
             val deviceId = FixtureBuilders.deviceId()
             val cartCode = FixtureBuilders.cartCode()
 
-            val cartFixtureBuilder = FixtureBuilders.get<Cart>().setExp(Cart::code, cartCode)
-            val productFixtureBuilder = FixtureBuilders.get<Product>()
+            val cartFixtureBuilder = FixtureBuilders.builder<Cart>().setExp(Cart::code, cartCode)
+            val productFixtureBuilder = FixtureBuilders.builder<Product>()
 
             beforeEach {
                 val products = productFixtureBuilder.sampleList(2)
