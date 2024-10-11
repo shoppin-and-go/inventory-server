@@ -9,9 +9,9 @@ import com.shoppin_and_go.inventory_server.domain.ProductCode
 import java.util.*
 
 object FixtureBuilders {
-    fun fixtureMonkey(): FixtureMonkey = FixtureMonkey.builder().plugin(KotlinPlugin()).build()
+    val fixtureMonkey: FixtureMonkey = FixtureMonkey.builder().plugin(KotlinPlugin()).build()
 
-    inline fun <reified T> builder() = fixtureMonkey().giveMeBuilder<T>()
+    inline fun <reified T> builder() = fixtureMonkey.giveMeBuilder<T>()
     inline fun <reified T> sample(): T = builder<T>().sample()
 
     fun deviceId() = DeviceId("device-test_${UUID.randomUUID()}")
