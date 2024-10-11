@@ -1,9 +1,11 @@
 package com.shoppin_and_go.inventory_server.application
 
-import com.shoppin_and_go.inventory_server.dao.CartInventoryRepository
 import com.shoppin_and_go.inventory_server.dao.CartRepository
 import com.shoppin_and_go.inventory_server.dao.ProductRepository
-import com.shoppin_and_go.inventory_server.domain.*
+import com.shoppin_and_go.inventory_server.domain.Cart
+import com.shoppin_and_go.inventory_server.domain.CartCode
+import com.shoppin_and_go.inventory_server.domain.Product
+import com.shoppin_and_go.inventory_server.domain.ProductCode
 import com.shoppin_and_go.inventory_server.dto.InventoryUpdateRequest
 import com.shoppin_and_go.inventory_server.event.InventoryChangeEvent
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
@@ -16,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional
 class InventoryCommandService(
     private val cartRepository: CartRepository,
     private val productRepository: ProductRepository,
-    private val cartInventoryRepository: CartInventoryRepository,
     private val eventPublisher: ApplicationEventPublisher,
 ) {
     @Transactional
@@ -24,14 +25,17 @@ class InventoryCommandService(
         val cart = getCart(cartCode)
         val product = getProduct(request.productCode)
 
-        val changedInventory = changeCartInventory(cart, product, request.quantityChange)
+        val changedInventory = cart.changeProductQuantity(product, request.quantityChange)
+        cartRepository.save(cart)
 
         val event = InventoryChangeEvent(cart.id, changedInventory.updatedAt)
         eventPublisher.publishEvent(event)
     }
 
     fun flushCartInventory(cart: Cart) {
-        cartInventoryRepository.deleteAllByCart(cart)
+        cart.flushInventories()
+
+        cartRepository.save(cart)
     }
 
     private fun getCart(code: CartCode): Cart {
@@ -40,17 +44,5 @@ class InventoryCommandService(
 
     private fun getProduct(code: ProductCode): Product {
         return productRepository.findByCode(code) ?: throw ProductNotFoundException(code)
-    }
-
-    private fun changeCartInventory(cart: Cart, product: Product, quantityChange: Int): CartInventory {
-        val inventory = fetchCartInventory(cart, product)
-
-        inventory.changeQuantity(quantityChange)
-
-        return cartInventoryRepository.save(inventory)
-    }
-
-    private fun fetchCartInventory(cart: Cart, product: Product): CartInventory {
-        return cartInventoryRepository.findByCartAndProduct(cart, product) ?: CartInventory(cart, product)
     }
 }

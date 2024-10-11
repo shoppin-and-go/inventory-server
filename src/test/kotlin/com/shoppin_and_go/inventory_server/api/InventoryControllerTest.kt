@@ -6,7 +6,6 @@ import com.navercorp.fixturemonkey.kotlin.KotlinPlugin
 import com.navercorp.fixturemonkey.kotlin.giveMeBuilder
 import com.navercorp.fixturemonkey.kotlin.setExp
 import com.shoppin_and_go.inventory_server.dao.CartConnectionRepository
-import com.shoppin_and_go.inventory_server.dao.CartInventoryRepository
 import com.shoppin_and_go.inventory_server.dao.CartRepository
 import com.shoppin_and_go.inventory_server.dao.ProductRepository
 import com.shoppin_and_go.inventory_server.domain.*
@@ -39,7 +38,6 @@ class InventoryControllerTest(
     @Autowired private val cartRepository: CartRepository,
     @Autowired private val productRepository: ProductRepository,
     @Autowired private val cartConnectionRepository: CartConnectionRepository,
-    @Autowired private val cartInventoryRepository: CartInventoryRepository,
 ) : DescribeSpec() {
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") // Intellij false positive bug
     @Autowired
@@ -55,18 +53,15 @@ class InventoryControllerTest(
             val cartCode = CartCode("cart-test_${UUID.randomUUID()}")
             val productCode = ProductCode("product-test_${UUID.randomUUID()}")
 
-            beforeEach {
-                cart = fixtureMonkey
-                    .giveMeBuilder<Cart>()
-                    .setExp(Cart::code, cartCode)
-                    .sample()
-                    .let(cartRepository::save)
+            val cartFixtureBuilder = fixtureMonkey.giveMeBuilder<Cart>().setExp(Cart::code, cartCode)
+            val productFixtureBuilder = fixtureMonkey.giveMeBuilder<Product>().setExp(Product::code, productCode)
 
-                fixtureMonkey
-                    .giveMeBuilder<Product>()
-                    .setExp(Product::code, productCode)
-                    .sample()
-                    .let(productRepository::save)
+            beforeEach {
+                val product = productFixtureBuilder.sample()
+                cart = cartFixtureBuilder.sample()
+
+                productRepository.save(product)
+                cartRepository.save(cart)
             }
 
             it("200을 반환한다") {
@@ -112,27 +107,23 @@ class InventoryControllerTest(
         this.describe("GET /devices/{deviceId}/carts/{cartCode}/inventories") {
             lateinit var cart: Cart
             lateinit var cartConnection: CartConnection
-            lateinit var cartInventories: List<CartInventory>
             val deviceId = DeviceId("device-test_${UUID.randomUUID()}")
             val cartCode = CartCode("cart-test_${UUID.randomUUID()}")
 
+            val cartFixtureBuilder = fixtureMonkey.giveMeBuilder<Cart>().setExp(Cart::code, cartCode)
+            val productFixtureBuilder = fixtureMonkey.giveMeBuilder<Product>()
+
             beforeEach {
-                cart = fixtureMonkey
-                    .giveMeBuilder<Cart>()
-                    .setExp(Cart::code, cartCode)
-                    .sample()
-                    .let(cartRepository::save)
+                val products = productFixtureBuilder.sampleList(2)
+                cart = cartFixtureBuilder.sample()
 
+                products.forEach {
+                    cart.changeProductQuantity(it, Random().nextInt(1, 10))
+                }
+
+                productRepository.saveAll(products)
+                cartRepository.save(cart)
                 cartConnection = cartConnectionRepository.save(CartConnection(cart, deviceId))
-
-                val products = fixtureMonkey
-                    .giveMeBuilder<Product>()
-                    .sampleList(2)
-                    .let(productRepository::saveAll)
-
-                cartInventories = products.map {
-                    CartInventory(cart, it).apply { changeQuantity(Random().nextInt(1, 10)) }
-                }.let(cartInventoryRepository::saveAll)
             }
 
             it("200을 반환한다") {
@@ -142,12 +133,12 @@ class InventoryControllerTest(
                 )
                     .andExpect(status().isOk)
                     .andExpect(jsonPath("$.result.inventory.cartCode").value(cartCode.toString()))
-                    .andExpect(jsonPath("$.result.inventory.items[0].name").value(cartInventories[0].product.name))
-                    .andExpect(jsonPath("$.result.inventory.items[0].price").value(cartInventories[0].product.price))
-                    .andExpect(jsonPath("$.result.inventory.items[0].quantity").value(cartInventories[0].quantity))
-                    .andExpect(jsonPath("$.result.inventory.items[1].name").value(cartInventories[1].product.name))
-                    .andExpect(jsonPath("$.result.inventory.items[1].price").value(cartInventories[1].product.price))
-                    .andExpect(jsonPath("$.result.inventory.items[1].quantity").value(cartInventories[1].quantity))
+                    .andExpect(jsonPath("$.result.inventory.items[0].name").value(cart.inventories[0].product.name))
+                    .andExpect(jsonPath("$.result.inventory.items[0].price").value(cart.inventories[0].product.price))
+                    .andExpect(jsonPath("$.result.inventory.items[0].quantity").value(cart.inventories[0].quantity))
+                    .andExpect(jsonPath("$.result.inventory.items[1].name").value(cart.inventories[1].product.name))
+                    .andExpect(jsonPath("$.result.inventory.items[1].price").value(cart.inventories[1].product.price))
+                    .andExpect(jsonPath("$.result.inventory.items[1].quantity").value(cart.inventories[1].quantity))
             }
 
             context("코드에 해당하는 카트가 없을 때") {
