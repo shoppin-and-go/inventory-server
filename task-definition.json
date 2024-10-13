@@ -50,10 +50,6 @@
   "family": "shoppin-and-go-api-task",
   "executionRoleArn": "arn:aws:iam::309327648043:role/ecsTaskExecutionRole",
   "networkMode": "bridge",
-  "compatibilities": [
-    "EXTERNAL",
-    "EC2"
-  ],
   "cpu": "256",
   "memory": "400"
 }
