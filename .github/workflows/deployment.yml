@@ -35,6 +35,11 @@ jobs:
           cache: 'gradle'
       - name: Build and push image to Amazon ECR
         run: ./gradlew clean jib -x test
+      - name: Change aws region
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::309327648043:role/ecr-deploy
+          aws-region: ap-northeast-2
       - name: Deploy to AWS ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
