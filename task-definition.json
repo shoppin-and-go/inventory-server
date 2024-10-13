@@ -1,0 +1,59 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "application",
+      "image": "public.ecr.aws/e6u1y0g6/shoppin-and-go/inventory-server:latest",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "SERVER_PORT",
+          "value": "80"
+        },
+        {
+          "name": "SPRING_DATASOURCE_URL",
+          "value": "jdbc:mysql://3.35.25.97:3306/inventory_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8"
+        },
+        {
+          "name": "SPRING_PROFILES_ACTIVE",
+          "value": "dev"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "SPRING_DATASOURCE_PASSWORD",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:309327648043:parameter/shoppin-and-go/mysql/password"
+        },
+        {
+          "name": "SPRING_DATASOURCE_USERNAME",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:309327648043:parameter/shoppin-and-go/mysql/user"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/shoppin-and-go-api-task",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "systemControls": []
+    }
+  ],
+  "family": "shoppin-and-go-api-task",
+  "executionRoleArn": "arn:aws:iam::309327648043:role/ecsTaskExecutionRole",
+  "networkMode": "bridge",
+  "compatibilities": [
+    "EXTERNAL",
+    "EC2"
+  ],
+  "cpu": "256",
+  "memory": "400"
+}

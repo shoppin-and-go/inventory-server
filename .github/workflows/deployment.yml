@@ -35,10 +35,10 @@ jobs:
           cache: 'gradle'
       - name: Build and push image to Amazon ECR
         run: ./gradlew clean jib -x test
-#      - name: Deploy to AWS ECS
-#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-#        with:
-#          task-definition: task-definition.json
-#          cluster: <ECS_CLUSTER_NAME>
-#          service: <ECS_SERVICE_NAME>
-#          wait-for-service-stability: true
+      - name: Deploy to AWS ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: task-definition.json
+          cluster: shoppin-and-go-cluster
+          service: inventory-api
+          wait-for-service-stability: true
