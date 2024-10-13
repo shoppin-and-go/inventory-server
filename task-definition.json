@@ -19,7 +19,7 @@
         },
         {
           "name": "SPRING_DATASOURCE_URL",
-          "value": "jdbc:mysql://3.35.25.97:3306/inventory_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8"
+          "value": "jdbc:mysql://43.202.241.13:3306/inventory_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8"
         },
         {
           "name": "SPRING_PROFILES_ACTIVE",
