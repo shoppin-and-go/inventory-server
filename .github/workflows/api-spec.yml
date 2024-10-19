@@ -32,6 +32,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_oas3  # build_oas3 작업이 완료된 후 실행
     steps:
+      - name: Clear and create docs directory
+        run: |
+          rm -rf ./docs
+          mkdir ./docs
+
       - name: Clone Swagger UI
         run: |
           git clone https://github.com/swagger-api/swagger-ui.git
