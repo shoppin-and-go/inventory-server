@@ -44,7 +44,7 @@ jobs:
 
       - name: Update oas3 file path in index.html
         run: |
-          sed -i 's|url: "https://petstore.swagger.io/v2/swagger.json"|url: "./api-docs.yaml"|' ./docs/index.html
+          sed -i 's|url: "https://petstore.swagger.io/v2/swagger.json"|url: "./api-docs.yaml"|' ./docs/swagger-initializer.js
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
