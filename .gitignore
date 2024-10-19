@@ -38,3 +38,6 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### OAS Generator ###
+src/main/resources/static/swagger-ui/openapi3.yaml
