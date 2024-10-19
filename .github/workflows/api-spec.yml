@@ -4,9 +4,16 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build_oas3:
@@ -24,15 +31,12 @@ jobs:
       - name: Generate OpenAPI 3 Spec
         run: ./gradlew clean openapi3
 
-      - name: Clear and create docs directory
-        run: |
-          rm -rf ./docs
-          mkdir ./docs
-
       - name: Clone Swagger UI
         run: |
           git clone https://github.com/swagger-api/swagger-ui.git
           mkdir -p ./swagger-ui/dist
+          rm -rf ./docs
+          mkdir ./docs
           cp -r ./swagger-ui/dist/* ./docs/
 
       - name: Copy OpenAPI file
@@ -42,8 +46,11 @@ jobs:
         run: |
           sed -i 's|url: "https://petstore.swagger.io/v2/swagger.json"|url: "./api-docs.yaml"|' ./docs/index.html
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          path: './docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
