@@ -15,12 +15,13 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  API_DOCS_DIR: api-docs
+  BUILD_OUTPUT_PATH: build/api-spec/openapi3.yaml
+
 jobs:
   build_oas3:
     runs-on: ubuntu-latest
-    env:
-      API_DOCS_DIR: api-docs
-      BUILD_OUTPUT_PATH: build/api-spec/openapi3.yaml
     steps:
       - uses: actions/checkout@v4
 
