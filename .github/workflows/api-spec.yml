@@ -1,0 +1,26 @@
+name: Publish API Spec
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  upload_oas3:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Upload OAS3 to GitHub Contents API
+        run: |
+          curl -X PUT \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d @- https://api.github.com/repos/${{ github.repository }}/contents/api-docs.yaml <<EOF
+          {
+            "message": "Uploading OAS3 file",
+            "content": "$(base64 -w 0 < build/api-spec/openapi3.yaml)",
+            "branch": "main"
+          }
+          EOF
