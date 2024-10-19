@@ -1,2 +1,3 @@
-DeviceConnection: 기기와 카트를 연관할 때 사용하는 API 입니다
+DeviceConnection: 기기와 카트를 연결할 때 사용하는 API 입니다
+CartInventory: 카트의 재고를 조회하고 변경하는 API 입니다
 ErrorHandling: 예외 처리가 필요한 API 입니다
