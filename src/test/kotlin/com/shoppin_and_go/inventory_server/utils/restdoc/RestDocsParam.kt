@@ -1,11 +1,21 @@
 package com.shoppin_and_go.inventory_server.utils.restdoc
 
-import org.springframework.restdocs.request.ParameterDescriptor
-import org.springframework.restdocs.request.RequestDocumentation
+import com.epages.restdocs.apispec.ParameterDescriptorWithType
+import com.epages.restdocs.apispec.SimpleType
 
 class RestDocsParam(
-    val descriptor: ParameterDescriptor,
-)
+    val descriptor: ParameterDescriptorWithType,
+) {
+    infix fun isOptional(value: Boolean): RestDocsParam {
+        if (value) descriptor.optional()
+        return this
+    }
+
+    infix fun type(type: SimpleType): RestDocsParam {
+        descriptor.type(type)
+        return this
+    }
+}
 
 infix fun String.pathMeans(
     description: String,
@@ -16,14 +26,9 @@ infix fun String.pathMeans(
 private fun createField(
     value: String,
     description: String,
-    optional: Boolean = false,
 ): RestDocsParam {
-    RequestDocumentation.parameterWithName("").attributes()
-    val descriptor = RequestDocumentation
-        .parameterWithName(value)
+    val descriptor = ParameterDescriptorWithType(value)
         .description(description)
-
-    if (optional) descriptor.optional()
 
     return RestDocsParam(descriptor)
 }

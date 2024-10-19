@@ -1,11 +1,21 @@
 package com.shoppin_and_go.inventory_server.utils.restdoc
 
-import org.springframework.restdocs.headers.HeaderDescriptor
-import org.springframework.restdocs.headers.HeaderDocumentation
+import com.epages.restdocs.apispec.HeaderDescriptorWithType
+import com.epages.restdocs.apispec.SimpleType
 
 class RestDocsHeader(
-    val descriptor: HeaderDescriptor,
-)
+    val descriptor: HeaderDescriptorWithType,
+) {
+    infix fun isOptional(value: Boolean): RestDocsHeader {
+        if (value) descriptor.optional()
+        return this
+    }
+
+    infix fun type(type: SimpleType): RestDocsHeader {
+        descriptor.type(type)
+        return this
+    }
+}
 
 infix fun String.headerMeans(
     description: String,
@@ -16,13 +26,9 @@ infix fun String.headerMeans(
 private fun createField(
     value: String,
     description: String,
-    optional: Boolean = false,
 ): RestDocsHeader {
-    val descriptor = HeaderDocumentation
-        .headerWithName(value)
+    val descriptor = HeaderDescriptorWithType(value)
         .description(description)
-
-    if (optional) descriptor.optional()
 
     return RestDocsHeader(descriptor)
 }

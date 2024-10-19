@@ -61,13 +61,9 @@ infix fun String.type(
 private fun createField(
     value: String,
     type: JsonFieldType,
-    optional: Boolean = true,
 ): RestDocsField {
     val descriptor = PayloadDocumentation.fieldWithPath(value)
         .type(type)
-        .description("")
-
-    if (optional) descriptor.optional()
 
     return RestDocsField(descriptor)
 }

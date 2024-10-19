@@ -4,12 +4,7 @@ import com.epages.restdocs.apispec.ResourceDocumentation.resource
 import com.epages.restdocs.apispec.ResourceSnippetParameters
 import com.epages.restdocs.apispec.ResourceSnippetParametersBuilder
 import com.epages.restdocs.apispec.Schema
-import org.springframework.restdocs.headers.HeaderDocumentation
-import org.springframework.restdocs.headers.RequestHeadersSnippet
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.request.PathParametersSnippet
-import org.springframework.restdocs.request.QueryParametersSnippet
-import org.springframework.restdocs.request.RequestDocumentation
 import org.springframework.test.web.servlet.ResultActions
 
 inline fun ResultActions.andApiSpec(
@@ -49,14 +44,14 @@ inline fun <reified E : Exception> ResultActions.andErrorApiSpec(identifier: Str
 }
 
 
-fun requestHeaders(vararg params: RestDocsHeader): RequestHeadersSnippet =
-    HeaderDocumentation.requestHeaders(params.map { it.descriptor })
+fun ResourceSnippetParametersBuilder.requestHeaders(vararg params: RestDocsHeader) =
+    requestHeaders(params.map { it.descriptor })
 
-fun pathParameters(vararg params: RestDocsParam): PathParametersSnippet =
-    RequestDocumentation.pathParameters(params.map { it.descriptor })
+fun ResourceSnippetParametersBuilder.pathParameters(vararg params: RestDocsParam) =
+    pathParameters(params.map { it.descriptor })
 
-fun queryParameters(vararg params: RestDocsParam): QueryParametersSnippet =
-    RequestDocumentation.queryParameters(params.map { it.descriptor })
+fun ResourceSnippetParametersBuilder.queryParameters(vararg params: RestDocsParam) =
+    queryParameters(params.map { it.descriptor })
 
 fun ResourceSnippetParametersBuilder.requestFields(vararg fields: RestDocsField) =
     requestFields(fields.map(RestDocsField::descriptor))
