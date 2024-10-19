@@ -42,7 +42,7 @@ jobs:
           cp -r ./swagger-ui/dist/* ./${{ env.API_DOCS_DIR }}
 
       - name: Copy OpenAPI file
-        run: cp ${{ BUILD_OUTPUT_PATH }} ./${{ env.API_DOCS_DIR }}/openapi3.yaml
+        run: cp ${{ env.BUILD_OUTPUT_PATH }} ./${{ env.API_DOCS_DIR }}/openapi3.yaml
 
       - name: Update oas3 file path in index.html
         run: |
