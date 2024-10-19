@@ -1,28 +1,41 @@
 package com.shoppin_and_go.inventory_server.dto
 
-sealed class ApiResponse<T>(
-    val code: ResponseCode,
-    val message: String,
-    val result: Map<String, T>
-) {
+import com.shoppin_and_go.inventory_server.exception.LogicalException
+
+sealed interface ApiResponse {
+    val code: String
+    val message: String
+    val result: Map<String, *>
+}
+
+data class ErrorResponse(
+    override val code: String,
+    override val message: String,
+    override val result: Map<String, Any>,
+) : ApiResponse {
+    constructor(e: LogicalException) : this(
+        code = e.errorCode.toString(),
+        message = e.message,
+        result = e.payload
+    )
+
+    constructor(e: Exception) : this(
+        code = "UnknownError",
+        message = e.message ?: "Unknown error. Please contact the developer",
+        result = emptyMap()
+    )
+}
+
+class SuccessResponse<T>(
+    override val code: String = "OK",
+    override val message: String = "",
+    override val result: Map<String, T> = emptyMap(),
+) : ApiResponse {
+    constructor(key: String, value: T) : this(
+        result = mapOf(key to value)
+    )
+
     companion object {
-        fun <T> success(key: String, value: T) = SuccessResponse(key, value)
-        fun error(e: Exception) = ErrorResponse(e)
+        fun empty() = SuccessResponse<Unit>()
     }
 }
-
-enum class ResponseCode {
-    OK,
-    ERROR,
-}
-
-class SuccessResponse<T>(key: String, value: T) : ApiResponse<T>(
-    code = ResponseCode.OK,
-    message = "Success",
-    result = mapOf(key to value)
-)
-class ErrorResponse(e: Exception) : ApiResponse<String>(
-    code = ResponseCode.ERROR,
-    message = e.message ?: "Internal server error",
-    result = emptyMap()
-)
