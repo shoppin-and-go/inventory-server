@@ -93,6 +93,7 @@ jib {
 openapi3 {
 	title = "Shoppin&Go Inventory API"
 	format = "yaml"
+	tagDescriptionsPropertiesFile = "src/main/resources/open-api-tag-descriptions.yaml"
 }
 
 tasks.withType<Test> {
