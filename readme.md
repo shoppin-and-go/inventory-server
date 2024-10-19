@@ -3,6 +3,8 @@
 
 # inventory-server
 
+[API Specification Document](https://shoppin-and-go.github.io/inventory-server/api-docs)
+
 카트와 앱을 QR코드를 통해 연동하고, 카트에 넣는 상품들을 실시간으로 앱을 통해 확인할 수 있도록 하는 API 입니다
 
 이 레포지토리에서는 아래의 기능들을 제공합니다.
