@@ -24,14 +24,6 @@ jobs:
       - name: Generate OpenAPI 3 Spec
         run: ./gradlew clean openapi3
 
-      - name: Set output for OpenAPI file path
-        id: set_output
-        run: echo "oas3_file_path=$(pwd)/build/api-spec/openapi3.yaml" >> $GITHUB_ENV
-
-  deploy_swagger_ui:
-    runs-on: ubuntu-latest
-    needs: build_oas3  # build_oas3 작업이 완료된 후 실행
-    steps:
       - name: Clear and create docs directory
         run: |
           rm -rf ./docs
@@ -44,7 +36,7 @@ jobs:
           cp -r ./swagger-ui/dist/* ./docs/
 
       - name: Copy OpenAPI file
-        run: cp ${{ env.oas3_file_path }} ./docs/api-docs.yaml
+        run: cp build/api-spec/openapi3.yaml ./docs/api-docs.yaml
 
       - name: Update oas3 file path in index.html
         run: |
