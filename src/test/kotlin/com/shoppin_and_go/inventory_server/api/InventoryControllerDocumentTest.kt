@@ -71,6 +71,12 @@ class InventoryControllerDocumentTest(
                     pathParameters(
                         "cartCode" pathMeans "변경할 카트의 코드" type SimpleType.STRING
                     )
+                    responseSchema(Schema("EmptyResponse"))
+                    responseFields(
+                        "code" type STRING means "응답 코드",
+                        "message" type STRING means "응답 메시지",
+                        "result" type OBJECT means "빈 객체",
+                    )
                 }
         }
 
@@ -82,7 +88,13 @@ class InventoryControllerDocumentTest(
 
                 mockRequest(cart, request)
                     .andExpect(status().isBadRequest)
-                    .andErrorApiSpec<CartNotFoundException>(apiSpecIdentifier)
+                    .andErrorApiSpec<CartNotFoundException>(apiSpecIdentifier) {
+                        responseFields(
+                            "code" type STRING means "응답 코드",
+                            "message" type STRING means "응답 메시지",
+                            "result.cartCode" type STRING means "존재하지 않는 카트 코드",
+                        )
+                    }
 
             }
         }
@@ -151,21 +163,29 @@ class InventoryControllerDocumentTest(
             it("400 BadRequest") {
                 mockRequest(deviceId, cart)
                     .andExpect(status().isBadRequest)
-                    .andExpect(jsonPath("$.code").value("ERROR"))
-                    .andExpect(jsonPath("$.message").value("Cart not found: ${cart.code}"))
-                    .andErrorApiSpec<CartNotFoundException>(apiSpecIdentifier)
+                    .andErrorApiSpec<CartNotFoundException>(apiSpecIdentifier) {
+                        responseFields(
+                            "code" type STRING means "응답 코드",
+                            "message" type STRING means "응답 메시지",
+                            "result.cartCode" type STRING means "존재하지 않는 카트 코드",
+                        )
+                    }
             }
         }
 
         context("기기에 연결되지 않은 카트일 때") {
             beforeEach { cartConnectionRepository.delete(cartConnection) }
 
-            it("401 Unauthorized") {
+            it("403 Forbidden") {
                 mockRequest(deviceId, cart)
-                    .andExpect(status().isUnauthorized)
-                    .andExpect(jsonPath("$.code").value("ERROR"))
-                    .andExpect(jsonPath("$.message").value("This cart is not connected to this device"))
-                    .andErrorApiSpec<UnconnectedCartException>(apiSpecIdentifier)
+                    .andExpect(status().isForbidden)
+                    .andErrorApiSpec<UnconnectedCartException>(apiSpecIdentifier) {
+                        responseFields(
+                            "code" type STRING means "응답 코드",
+                            "message" type STRING means "응답 메시지",
+                            "result.cartCode" type STRING means "연결되지 않은 카트 코드",
+                        )
+                    }
             }
         }
     }

@@ -23,21 +23,19 @@ inline fun ResultActions.andApiSpec(
     )
 }
 
-inline fun <reified E : Exception> ResultActions.andErrorApiSpec(identifier: String): ResultActions {
-    val snippets = ResourceSnippetParameters.builder()
+inline fun <reified E : Exception> ResultActions.andErrorApiSpec(
+    identifier: String,
+    block: ResourceSnippetParametersBuilder.() -> ResourceSnippetParametersBuilder,
+): ResultActions {
+    val snippets = block.invoke(ResourceSnippetParameters.builder())
         .tags("ErrorHandling")
         .requestSchema(Schema("${identifier}Request"))
-        .responseSchema(Schema("ErrorResponse"))
-        .responseFields(
-            "code" type STRING means "응답 코드",
-            "message" type STRING means "오류 메시지",
-            "result" type OBJECT means "빈 객체",
-        )
+        .responseSchema(Schema("${E::class.simpleName}Response"))
         .build()
 
     return andDo(
         document(
-            "${identifier}_${E::class.simpleName}",
+            "${identifier}${E::class.simpleName}",
             resource(snippets),
         )
     )

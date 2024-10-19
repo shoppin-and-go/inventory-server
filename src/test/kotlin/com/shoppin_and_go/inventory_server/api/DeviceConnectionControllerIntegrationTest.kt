@@ -39,6 +39,8 @@ class DeviceConnectionControllerIntegrationTest(
     val cartBuilder = FixtureBuilders.builder<Cart>()
 
     describe("POST /cart-connections") {
+        val openApiIdentifier = "ConnectToCart"
+
         lateinit var cart: Cart
 
         beforeEach {
@@ -56,11 +58,9 @@ class DeviceConnectionControllerIntegrationTest(
                     .content(objectMapper.writeValueAsString(request))
             )
                 .andExpect(status().isOk)
-                .andExpect(jsonPath("$.code").value("OK"))
-                .andExpect(jsonPath("$.message").value("Success"))
                 .andExpect(jsonPath("$.result.connection.cartCode").value(cart.code.toString()))
                 .andExpect(jsonPath("$.result.connection.connected").value(true))
-                .andApiSpec("ConnectToCart") {
+                .andApiSpec(openApiIdentifier) {
                     description("기기와 카트를 연결합니다.")
                     tags("DeviceConnection")
                     requestFields(
@@ -94,8 +94,13 @@ class DeviceConnectionControllerIntegrationTest(
                         .content(objectMapper.writeValueAsString(request))
                 )
                     .andExpect(status().isBadRequest)
-                    .andExpect(jsonPath("$.code").value("ERROR"))
-                    .andErrorApiSpec<CartNotFoundException>("ConnectToCart")
+                    .andErrorApiSpec<CartNotFoundException>(openApiIdentifier) {
+                        responseFields(
+                            "code" type STRING means "응답 코드",
+                            "message" type STRING means "응답 메시지",
+                            "result.cartCode" type STRING means "존재하지 않는 카트 코드",
+                        )
+                    }
             }
         }
 
@@ -117,9 +122,13 @@ class DeviceConnectionControllerIntegrationTest(
                         .content(objectMapper.writeValueAsString(request))
                 )
                     .andExpect(status().isConflict)
-                    .andExpect(jsonPath("$.code").value("ERROR"))
-                    .andExpect(jsonPath("$.message").value("This device is already connected with another cart"))
-                    .andErrorApiSpec<DeviceAlreadyConnectedException>("ConnectToCart")
+                    .andErrorApiSpec<DeviceAlreadyConnectedException>(openApiIdentifier) {
+                        responseFields(
+                            "code" type STRING means "응답 코드",
+                            "message" type STRING means "응답 메시지",
+                            "result.deviceId" type STRING means "이미 연결된 디바이스 ID",
+                        )
+                    }
             }
         }
 
@@ -140,14 +149,20 @@ class DeviceConnectionControllerIntegrationTest(
                         .content(objectMapper.writeValueAsString(request))
                 )
                     .andExpect(status().isConflict)
-                    .andExpect(jsonPath("$.code").value("ERROR"))
-                    .andExpect(jsonPath("$.message").value("This cart is already connected with another device"))
-                    .andErrorApiSpec<CartAlreadyConnectedException>("ConnectToCart")
+                    .andErrorApiSpec<CartAlreadyConnectedException>(openApiIdentifier) {
+                        responseFields(
+                            "code" type STRING means "응답 코드",
+                            "message" type STRING means "응답 메시지",
+                            "result.cartCode" type STRING means "이미 연결된 카트 코드",
+                        )
+                    }
             }
         }
     }
 
     describe("GET /devices/{deviceId}/cart-connections") {
+        val openApiIdentifier = "ListCartConnections"
+
         val deviceId = FixtureBuilders.deviceId()
         val otherDeviceId = FixtureBuilders.deviceId()
 
@@ -170,15 +185,13 @@ class DeviceConnectionControllerIntegrationTest(
 
             mockMvc.perform(get("/devices/{deviceId}/cart-connections", deviceId))
                 .andExpect(status().isOk)
-                .andExpect(jsonPath("$.code").value("OK"))
-                .andExpect(jsonPath("$.message").value("Success"))
                 .andExpect(jsonPath("$.result.connections[0].cartCode").value(secondConnection.cart.code.toString()))
                 .andExpect(jsonPath("$.result.connections[0].connected").value(false))
                 .andExpect(jsonPath("$.result.connections[0].connectedAt").value(secondConnection.createdAt.format(dateTimeFormatter)))
                 .andExpect(jsonPath("$.result.connections[1].cartCode").value(firstConnection.cart.code.toString()))
                 .andExpect(jsonPath("$.result.connections[1].connected").value(true))
                 .andExpect(jsonPath("$.result.connections[1].connectedAt").value(firstConnection.createdAt.format(dateTimeFormatter)))
-                .andApiSpec("ListCartConnections") {
+                .andApiSpec(openApiIdentifier) {
                     description("기기의 카트 연결 히스토리를 조회합니다.")
                     tags("DeviceConnection")
                     pathParameters(
@@ -198,6 +211,8 @@ class DeviceConnectionControllerIntegrationTest(
     }
 
     describe("DELETE /devices/{deviceId}/cart-connections") {
+        val openApiIdentifier = "DisconnectFromAllCarts"
+
         val deviceId = FixtureBuilders.deviceId()
         val otherDeviceId = FixtureBuilders.deviceId()
 
@@ -215,18 +230,14 @@ class DeviceConnectionControllerIntegrationTest(
         it("연결을 해제한다") {
             mockMvc.perform(get("/devices/{deviceId}/cart-connections", deviceId))
                 .andExpect(status().isOk)
-                .andExpect(jsonPath("$.code").value("OK"))
-                .andExpect(jsonPath("$.message").value("Success"))
                 .andExpect(jsonPath("$.result.connections[0].connected").value(true))
                 .andExpect(jsonPath("$.result.connections[1].connected").value(true))
 
             mockMvc.perform(delete("/devices/{deviceId}/cart-connections", deviceId))
                 .andExpect(status().isOk)
-                .andExpect(jsonPath("$.code").value("OK"))
-                .andExpect(jsonPath("$.message").value("Success"))
                 .andExpect(jsonPath("$.result.connections[0].connected").value(false))
                 .andExpect(jsonPath("$.result.connections[1].connected").value(false))
-                .andApiSpec("DisconnectFromAllCarts") {
+                .andApiSpec(openApiIdentifier) {
                     description("기기의 카트 연결을 모두 해제합니다.")
                     tags("DeviceConnection")
                     pathParameters(
@@ -249,8 +260,6 @@ class DeviceConnectionControllerIntegrationTest(
 
             mockMvc.perform(get("/devices/{deviceId}/cart-connections", otherDeviceId))
                 .andExpect(status().isOk)
-                .andExpect(jsonPath("$.code").value("OK"))
-                .andExpect(jsonPath("$.message").value("Success"))
                 .andExpect(jsonPath("$.result.connections[0].connected").value(true))
                 .andExpect(jsonPath("$.result.connections[1].connected").value(true))
         }

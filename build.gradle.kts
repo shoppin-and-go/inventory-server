@@ -91,7 +91,18 @@ jib {
 }
 
 openapi3 {
+	setServer("http://localhost:8080")
 	title = "Shoppin&Go Inventory API"
+	description = """
+		Shoppin&Go Inventory API는 Shoppin&Go 서비스의 재고 관리를 위한 API입니다.
+		이 API는 카트, 상품, 재고 등의 정보를 관리합니다.
+		
+		`POST /cart-connections`를 통해 연결된 후에는 소켓 연결을 통해 재고 변경 이벤트를 수신해야합니다.
+		
+		`/ws` endpoint를 통해 소켓 연결을 만들고 `/queue/device/{deviceId}`를 구독해야합니다.
+		
+		[${this.servers.first().url}/socket-test.html](${this.servers.first().url}/socket-test.html) 에서 deviceId에 대한 구독 테스트를 할 수 있습니다.		
+	""".trimIndent()
 	format = "yaml"
 	tagDescriptionsPropertiesFile = "src/main/resources/open-api-tag-descriptions.yaml"
 }
@@ -104,13 +115,6 @@ tasks.register<Delete>("cleanGeneratedSnippets") {
 	delete("build/generated-snippets")
 }
 
-tasks.register<Copy>("copyOasToSwagger") {
-	delete("src/main/resources/static/swagger-ui/openapi3.yaml")
-	from("build/api-spec/openapi3.yaml")
-	into("src/main/resources/static/swagger-ui/.")
-}
-
 tasks.withType<OpenApi3Task>().configureEach {
 	dependsOn("cleanGeneratedSnippets")
-	finalizedBy("copyOasToSwagger")
 }
