@@ -12,7 +12,7 @@ import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.domain.Product
 import com.shoppin_and_go.inventory_server.dto.InventoryUpdateRequest
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
-import com.shoppin_and_go.inventory_server.exception.UnauthorizedCartException
+import com.shoppin_and_go.inventory_server.exception.UnconnectedCartException
 import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import com.shoppin_and_go.inventory_server.utils.restdoc.*
 import io.kotest.core.spec.style.DescribeSpec
@@ -165,7 +165,7 @@ class InventoryControllerDocumentTest(
                     .andExpect(status().isUnauthorized)
                     .andExpect(jsonPath("$.code").value("ERROR"))
                     .andExpect(jsonPath("$.message").value("This cart is not connected to this device"))
-                    .andErrorApiSpec<UnauthorizedCartException>(apiSpecIdentifier)
+                    .andErrorApiSpec<UnconnectedCartException>(apiSpecIdentifier)
             }
         }
     }

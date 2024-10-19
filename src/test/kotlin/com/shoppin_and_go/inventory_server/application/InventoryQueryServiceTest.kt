@@ -8,7 +8,7 @@ import com.shoppin_and_go.inventory_server.domain.Cart
 import com.shoppin_and_go.inventory_server.domain.Product
 import com.shoppin_and_go.inventory_server.dto.CartInventoryStatus
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
-import com.shoppin_and_go.inventory_server.exception.UnauthorizedCartException
+import com.shoppin_and_go.inventory_server.exception.UnconnectedCartException
 import com.shoppin_and_go.inventory_server.utils.FixtureBuilders
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
@@ -69,7 +69,7 @@ class InventoryQueryServiceTest(
             }
 
             it("권한 오류를 던진다") {
-                shouldThrow<UnauthorizedCartException> {
+                shouldThrow<UnconnectedCartException> {
                     service.listInventory(deviceId, cartCode)
                 }
             }

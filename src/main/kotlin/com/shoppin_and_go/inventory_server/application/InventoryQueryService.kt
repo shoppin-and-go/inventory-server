@@ -7,7 +7,7 @@ import com.shoppin_and_go.inventory_server.domain.CartCode
 import com.shoppin_and_go.inventory_server.domain.DeviceId
 import com.shoppin_and_go.inventory_server.dto.CartInventoryStatus
 import com.shoppin_and_go.inventory_server.exception.CartNotFoundException
-import com.shoppin_and_go.inventory_server.exception.UnauthorizedCartException
+import com.shoppin_and_go.inventory_server.exception.UnconnectedCartException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -37,6 +37,6 @@ class InventoryQueryService(
     private fun checkAuthority(deviceId: DeviceId, cart: Cart) {
         val connectionPresence =  cartConnectionRepository.existsByDeviceIdAndCartAndDisconnectedAtIsNull(deviceId, cart)
 
-        if (connectionPresence.not()) throw UnauthorizedCartException()
+        if (connectionPresence.not()) throw UnconnectedCartException(cart)
     }
 }

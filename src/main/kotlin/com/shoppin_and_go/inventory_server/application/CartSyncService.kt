@@ -23,8 +23,8 @@ class CartSyncService(
     fun connectToCart(code: CartCode, deviceId: DeviceId): CartConnectionStatus {
         val cart = getCart(code)
 
-        checkDeviceConnected(deviceId).throwIfTrue { DeviceAlreadyConnectedException() }
-        checkCartConnected(cart).throwIfTrue { CartAlreadyConnectedException() }
+        checkDeviceConnected(deviceId).throwIfTrue { DeviceAlreadyConnectedException(deviceId) }
+        checkCartConnected(cart).throwIfTrue { CartAlreadyConnectedException(cart) }
 
         val cartConnection = cart.createConnection(deviceId)
         return cartConnectionRepository.save(cartConnection).let(CartConnectionStatus::of)
