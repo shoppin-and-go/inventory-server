@@ -12,15 +12,14 @@ jobs:
   build_oas3:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'corretto'
           cache: 'gradle'
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Generate OpenAPI 3 Spec
         run: ./gradlew clean openapi3
