@@ -24,7 +24,7 @@ class CartTest : DescribeSpec({
     describe("Cart#changeProductQuantity") {
         lateinit var cart: Cart
         lateinit var product: Product
-        val quantityChange = FixtureBuilders.int()
+        val quantityChange = FixtureBuilders.quantity()
 
         beforeEach {
             cart = cartFixtureBuilder.sample()
@@ -64,7 +64,7 @@ class CartTest : DescribeSpec({
         }
 
         context("카트에 동일한 상품이 있는 경우") {
-            val initialQuantity = FixtureBuilders.int()
+            val initialQuantity = FixtureBuilders.quantity()
 
             beforeEach {
                 cart.changeProductQuantity(product, initialQuantity)

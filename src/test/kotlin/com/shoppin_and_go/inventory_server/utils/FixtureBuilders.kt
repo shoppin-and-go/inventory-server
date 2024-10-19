@@ -15,7 +15,14 @@ object FixtureBuilders {
             it.giveMeBuilder<Cart>().setExp(Cart::code, Arbitraries.create(FixtureBuilders::cartCode))
         }
         .register(Product::class.java) {
-            it.giveMeBuilder<Product>().setExp(Product::code, Arbitraries.create(FixtureBuilders::productCode))
+            it.giveMeBuilder<Product>()
+                .setExp(Product::code, Arbitraries.create(FixtureBuilders::productCode))
+                .setExp(Product::name, Arbitraries.strings().numeric().ofLength(4).map { code -> "Product$code" })
+                .setExp(Product::price, Arbitraries.integers().between(1, 100).map { int -> int * 1000 })
+        }
+        .register(CartInventory::class.java) {
+            it.giveMeBuilder<CartInventory>()
+                .setExp(CartInventory::quantity, Arbitraries.integers().between(1, 10))
         }
         .build()
 
@@ -25,5 +32,5 @@ object FixtureBuilders {
     fun deviceId() = DeviceId("device-test_${UUID.randomUUID()}")
     fun cartCode() = CartCode("cart-test_${UUID.randomUUID()}")
     fun productCode() = ProductCode("product-test_${UUID.randomUUID()}")
-    fun int() = Random().nextInt(1, 10)
+    fun quantity() = Arbitraries.integers().between(1, 10).sample()
 }
