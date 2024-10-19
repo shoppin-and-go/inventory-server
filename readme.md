@@ -1,3 +1,4 @@
+![api-spec](https://github.com/shoppin-and-go/inventory-server/actions/workflows/api-spec.yml/badge.svg?branch=main)
 ![ci](https://github.com/shoppin-and-go/inventory-server/actions/workflows/integration.yml/badge.svg?branch=main)
 ![cd](https://github.com/shoppin-and-go/inventory-server/actions/workflows/deployment.yml/badge.svg?branch=main)
 
