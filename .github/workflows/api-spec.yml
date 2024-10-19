@@ -35,16 +35,15 @@ jobs:
         run: |
           git clone https://github.com/swagger-api/swagger-ui.git
           mkdir -p ./swagger-ui/dist
-          rm -rf ./docs
-          mkdir ./docs
-          cp -r ./swagger-ui/dist/* ./docs/
+          mkdir -p ./docs/api-docs
+          cp -r ./swagger-ui/dist/* ./docs/api-docs
 
       - name: Copy OpenAPI file
         run: cp build/api-spec/openapi3.yaml ./docs/api-docs.yaml
 
       - name: Update oas3 file path in index.html
         run: |
-          sed -i 's|url: "https://petstore.swagger.io/v2/swagger.json"|url: "./api-docs.yaml"|' ./docs/swagger-initializer.js
+          sed -i 's|url: "https://petstore.swagger.io/v2/swagger.json"|url: "./api-docs.yaml"|' ./docs/api-docs/swagger-initializer.js
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
